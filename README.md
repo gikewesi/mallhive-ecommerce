@@ -13,23 +13,45 @@ A cloud-native e-commerce platform built on a microservices architecture. The sy
 1. **Frontend Service:**
    - Framework: Flask (for lightweight UI) or Django (for full-featured UI).
    - Served via AWS CloudFront (CDN) for faster content delivery.
-2. **User Service (Authentication & Profiles):**
-   - REST API using Flask/Django (Python) for user management.
+
+2. **User Management Service:**
+   - Handles user registration, login, and profile management.
+   - REST API using Flask/Django (Python) for user operations.
    - Secure password storage (e.g., bcrypt) and JWT authentication.
-3. **Product Service:**
+
+3. **Product Catalog Service:**
+   - Manages products, categories, and inventory.
    - Built in Go for fast, concurrent handling of product catalog.
-   - CRUD operations for products (with pagination and search).
-4. **Order Service:**
-   - Handles cart, order creation, and payment integration.
-   - Built with Flask/Django for ease of development.
-5. **Payment Service:**
-   - External Payment Gateway integration (e.g., Stripe).
-   - Secure payment handling and webhook support.
-6. **Inventory Service:**
+   - CRUD operations with pagination and search.
+
+4. **Shopping Cart Service:**
+   - Handles cart operations (add, update, remove items).
+   - Built with Flask/Django for rapid development and flexibility.
+
+5. **Order Processing Service:**
+   - Manages order creation, tracking, and status updates.
+   - Built in Go for performance and scalability.
+
+6. **Payment Gateway Service:**
+   - Integrates with external payment processors (e.g., Stripe).
+   - Secure payment handling and webhook support using Flask/Django.
+
+7. **Inventory Service:**
    - Manages stock levels and tracks product availability.
-7. **Notification Service:**
-   - Sends email/SMS notifications using AWS SNS and SES.
-8. **Admin Dashboard:**
+
+8. **Notification Service:**
+   - Sends emails, SMS, and real-time alerts.
+   - Built in Go for handling event-driven tasks.
+
+9. **Search & Recommendations Service:**
+   - Implements product search and AI-driven suggestions.
+   - Built in Go for concurrent processing and efficiency.
+
+10. **Analytics & Reporting Service:**
+   - Logs user behavior, sales metrics, and trends.
+   - Uses Go and AWS Kinesis for real-time data streaming and analysis.
+
+11. **Admin Dashboard:**
    - Provides analytics, order management, and inventory control.
 
 ---
@@ -138,4 +160,20 @@ A cloud-native e-commerce platform built on a microservices architecture. The sy
    - Implement Istio for advanced traffic management.
 3. **Analytics Pipeline:**
    - Use AWS Kinesis and Athena for real-time insights.
+
+
+### **Technology Stack Overview**
+
+| Component                 | Purpose                                          |
+|---------------------------|-------------------------------------------------|
+| Python (Flask/Django)     | REST APIs for business logic and user interfaces|
+| Go                        | High-performance services (product, orders)     |
+| Docker & Kubernetes       | Containerization & orchestration for microservices|
+| AWS EKS                   | Kubernetes management (multi-region ready)      |
+| AWS RDS                   | Persistent database (PostgreSQL/MySQL)          |
+| AWS S3                    | Static assets (product images, user uploads)    |
+| AWS CloudFront            | CDN for global content delivery                 |
+| Terraform                 | IaC to automate AWS resources                   |
+| GitHub Actions            | CI/CD pipeline for automated testing and deployment|
+| ArgoCD                    | GitOps deployment to EKS                        |
 
