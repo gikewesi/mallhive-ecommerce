@@ -1,177 +1,200 @@
 package main
 
 import (
-	"bytes"
-	"database/sql"
-	"encoding/json"
-	"fmt"
+	"github.com/gin-gonic/gin"
+	"github.com/joho/godotenv"
+	"gorm.io/driver/postgres"
+	"gorm.io/gorm"
+	"gorm.io/gorm/logger"
+
 	"log"
 	"net/http"
 	"os"
-	"strconv"
-
-	"github.com/gorilla/mux"
-	_ "github.com/lib/pq" // PostgreSQL driver
+	"strings"
 )
 
-// Database connection
-var db *sql.DB
-
-// Product struct for JSON responses
 type Product struct {
-	ID           int     `json:"id"`
-	Name         string  `json:"name"`
-	Category     string  `json:"category"`
-	Price        float64 `json:"price"`
-	Availability bool    `json:"availability"`
+	ID          uint      `gorm:"primaryKey" json:"id"`
+	Name        string    `gorm:"unique;not null" json:"name"`
+	Slug        string    `gorm:"unique;not null" json:"slug"`
+	CategoryID  uint      `json:"categoryId"`
+	Price       float64   `json:"price"`
+	Available   bool      `json:"available"`
+	Description string    `json:"description"`
+	ImageURL    string    `json:"imageURL"`
+	Category    Category  `json:"category"`
+	Inventory   Inventory `json:"inventory"`
 }
 
-// Category struct for JSON responses
 type Category struct {
-	ID   int    `json:"id"`
-	Name string `json:"name"`
+	ID   uint   `gorm:"primaryKey" json:"id"`
+	Name string `gorm:"unique;not null" json:"name"`
+	Slug string `gorm:"unique;not null" json:"slug"`
 }
 
-// Initialize database connection
-func initDB() {
+type Inventory struct {
+	ID        uint `gorm:"primaryKey" json:"id"`
+	ProductID uint `json:"productId"`
+	Quantity  int  `json:"stockQuantity"`
+}
+
+var db *gorm.DB
+
+func main() {
+	_ = godotenv.Load()
+
+	dsn := os.Getenv("DB_DSN")
+	if dsn == "" {
+		dsn = "host=localhost user=mallhive password=yourpassword dbname=mallhive_products port=5432 sslmode=disable"
+	}
+
 	var err error
-	db, err = sql.Open("postgres", os.Getenv("DATABASE_URL"))
+	db, err = gorm.Open(postgres.Open(dsn), &gorm.Config{Logger: logger.Default.LogMode(logger.Silent)})
 	if err != nil {
-		log.Fatal("❌ Database connection failed:", err)
+		log.Fatal("failed to connect to database: ", err)
 	}
-	if err = db.Ping(); err != nil {
-		log.Fatal("❌ Database unreachable:", err)
-	}
-	fmt.Println("✅ Connected to PostgreSQL")
+
+	// Migrate schema
+	db.AutoMigrate(&Product{}, &Category{}, &Inventory{})
+
+	r := gin.Default()
+	r.Use(corsMiddleware())
+
+	// Product routes
+	r.GET("/products", listProducts)
+	r.GET("/products/:slug", getProductBySlug)
+	r.POST("/products", createProduct)
+
+	// Category routes
+	r.GET("/categories", listCategories)
+	r.POST("/categories", createCategory)
+
+	// Order forwarding
+	r.POST("/orders", forwardToOrderService)
+
+	// Run the server
+	r.Run(":8080")
 }
 
-// Fetch all products
-func getProductsHandler(w http.ResponseWriter, r *http.Request) {
-	rows, err := db.Query("SELECT id, name, category, price, availability FROM products")
-	if err != nil {
-		http.Error(w, "Error fetching products", http.StatusInternalServerError)
-		return
-	}
-	defer rows.Close()
+// -------- Product Handlers --------
 
+func listProducts(c *gin.Context) {
 	var products []Product
-	for rows.Next() {
-		var p Product
-		if err := rows.Scan(&p.ID, &p.Name, &p.Category, &p.Price, &p.Availability); err != nil {
-			http.Error(w, "Error scanning product data", http.StatusInternalServerError)
-			return
-		}
-		products = append(products, p)
-	}
-
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(products)
+	db.Preload("Category").Preload("Inventory").Find(&products)
+	c.JSON(http.StatusOK, products)
 }
 
-// Fetch all categories
-func getCategoriesHandler(w http.ResponseWriter, r *http.Request) {
-	rows, err := db.Query("SELECT id, name FROM categories")
-	if err != nil {
-		http.Error(w, "Error fetching categories", http.StatusInternalServerError)
+func getProductBySlug(c *gin.Context) {
+	slug := c.Param("slug")
+	var product Product
+	result := db.Preload("Category").Preload("Inventory").Where("slug = ?", slug).First(&product)
+	if result.Error != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Product not found"})
 		return
 	}
-	defer rows.Close()
+	c.JSON(http.StatusOK, product)
+}
 
+func createProduct(c *gin.Context) {
+	var input struct {
+		Name        string  `json:"name" binding:"required"`
+		CategoryID  uint    `json:"categoryId" binding:"required"`
+		Price       float64 `json:"price" binding:"required"`
+		Available   bool    `json:"available"`
+		Description string  `json:"description"`
+		ImageURL    string  `json:"imageURL"`
+		StockQty    int     `json:"stockQuantity"`
+	}
+	if err := c.ShouldBindJSON(&input); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	slug := slugify(input.Name)
+
+	product := Product{
+		Name:        input.Name,
+		Slug:        slug,
+		CategoryID:  input.CategoryID,
+		Price:       input.Price,
+		Available:   input.Available,
+		Description: input.Description,
+		ImageURL:    input.ImageURL,
+	}
+
+	if err := db.Create(&product).Error; err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Failed to create product", "details": err.Error()})
+		return
+	}
+
+	// Create inventory record
+	inventory := Inventory{
+		ProductID: product.ID,
+		Quantity:  input.StockQty,
+	}
+	db.Create(&inventory)
+
+	// Fetch full product with relations to return
+	db.Preload("Category").Preload("Inventory").First(&product, product.ID)
+
+	c.JSON(http.StatusCreated, product)
+}
+
+// -------- Category Handlers --------
+
+func listCategories(c *gin.Context) {
 	var categories []Category
-	for rows.Next() {
-		var c Category
-		if err := rows.Scan(&c.ID, &c.Name); err != nil {
-			http.Error(w, "Error scanning category data", http.StatusInternalServerError)
-			return
-		}
-		categories = append(categories, c)
-	}
-
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(categories)
+	db.Find(&categories)
+	c.JSON(http.StatusOK, categories)
 }
 
-// Update product inventory availability
-func updateAvailabilityHandler(w http.ResponseWriter, r *http.Request) {
-	vars := mux.Vars(r)
-	id, err := strconv.Atoi(vars["id"])
-	if err != nil {
-		http.Error(w, "Invalid product ID", http.StatusBadRequest)
+func createCategory(c *gin.Context) {
+	var input Category
+	if err := c.ShouldBindJSON(&input); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	var req struct {
-		Availability bool `json:"availability"`
-	}
-	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		http.Error(w, "Invalid request body", http.StatusBadRequest)
+	input.Slug = slugify(input.Name)
+
+	if err := db.Create(&input).Error; err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Failed to create category", "details": err.Error()})
 		return
 	}
 
-	result, err := db.Exec("UPDATE products SET availability=$1 WHERE id=$2", req.Availability, id)
-	if err != nil || result == nil {
-		http.Error(w, "Failed to update availability", http.StatusInternalServerError)
-		return
-	}
-
-	fmt.Fprintf(w, "✅ Product availability updated")
+	c.JSON(http.StatusCreated, input)
 }
 
-// Send order request to Order Service
-func sendOrderRequest(productID int) error {
-	orderServiceURL := os.Getenv("ORDER_SERVICE_URL") // e.g., "http://order-service/orders"
-	orderData := map[string]int{"product_id": productID}
+// -------- Order Forwarding --------
 
-	jsonData, err := json.Marshal(orderData)
+func forwardToOrderService(c *gin.Context) {
+	resp, err := http.Post("http://mallhive.com/orders", "application/json", c.Request.Body)
 	if err != nil {
-		return fmt.Errorf("failed to marshal order data: %v", err)
-	}
-
-	resp, err := http.Post(orderServiceURL, "application/json", bytes.NewBuffer(jsonData))
-	if err != nil {
-		return fmt.Errorf("failed to send order request: %v", err)
+		c.JSON(http.StatusServiceUnavailable, gin.H{"error": "Order service unreachable"})
+		return
 	}
 	defer resp.Body.Close()
 
-	if resp.StatusCode != http.StatusOK {
-		return fmt.Errorf("order service returned error: %d", resp.StatusCode)
-	}
-
-	fmt.Println("✅ Order request sent successfully!")
-	return nil
+	c.JSON(resp.StatusCode, gin.H{"message": "Order forwarded successfully"})
 }
 
-// Handle order requests for products
-func orderProductHandler(w http.ResponseWriter, r *http.Request) {
-	vars := mux.Vars(r)
-	id, err := strconv.Atoi(vars["id"])
-	if err != nil {
-		http.Error(w, "Invalid product ID", http.StatusBadRequest)
-		return
-	}
+// -------- Helpers --------
 
-	err = sendOrderRequest(id)
-	if err != nil {
-		http.Error(w, fmt.Sprintf("Failed to send order request: %v", err), http.StatusInternalServerError)
-		return
-	}
-
-	w.WriteHeader(http.StatusOK)
-	fmt.Fprintf(w, "✅ Order request sent for product %d", id)
+func slugify(input string) string {
+	return strings.ToLower(strings.ReplaceAll(input, " ", "-"))
 }
 
-// Main function to start the server
-func main() {
-	initDB()
-	defer db.Close()
+func corsMiddleware() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		c.Writer.Header().Set("Access-Control-Allow-Origin", "*") // You can change "*" to your frontend domain
+		c.Writer.Header().Set("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
+		c.Writer.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
 
-	r := mux.NewRouter()
+		if c.Request.Method == "OPTIONS" {
+			c.AbortWithStatus(http.StatusNoContent)
+			return
+		}
 
-	r.HandleFunc("/api/products", getProductsHandler).Methods("GET")                          // Fetch all products
-	r.HandleFunc("/api/categories", getCategoriesHandler).Methods("GET")                      // Fetch all categories
-	r.HandleFunc("/api/products/{id}/availability", updateAvailabilityHandler).Methods("PUT") // Update availability
-	r.HandleFunc("/api/products/{id}/order", orderProductHandler).Methods("POST")             // Send order request
-
-	fmt.Println("🚀 Server started on port 8080")
-	log.Fatal(http.ListenAndServe(":8080", r))
+		c.Next()
+	}
 }
