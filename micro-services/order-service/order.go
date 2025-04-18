@@ -10,8 +10,8 @@ import (
 	"os"
 	"time"
 
-	"github.com/lib/pq"
 	"github.com/joho/godotenv"
+	"github.com/lib/pq"
 )
 
 type Order struct {
@@ -134,4 +134,25 @@ func sendToPaymentService(order Order) {
 		"amount":   order.Total,
 	})
 
-	resp
+	resp, err := http.Post(paymentURL, "application/json", bytes.NewBuffer(payload))
+	if err != nil || resp.StatusCode != http.StatusOK {
+		log.Printf("Payment service error for order %d: %v", order.ID, err)
+	}
+}
+
+// Send a notification to the Notification Service
+func sendToNotificationService(order Order) {
+	notificationURL := "http://notification-service/notifications/send"
+
+	message := fmt.Sprintf("Your order %d has been placed. Total amount: $%.2f", order.ID, order.Total)
+	payload, _ := json.Marshal(map[string]interface{}{
+		"user_id":  order.UserID,
+		"order_id": order.ID,
+		"message":  message,
+	})
+
+	resp, err := http.Post(notificationURL, "application/json", bytes.NewBuffer(payload))
+	if err != nil || resp.StatusCode != http.StatusOK {
+		log.Printf("Notification service error for order %d: %v", order.ID, err)
+	}
+}
