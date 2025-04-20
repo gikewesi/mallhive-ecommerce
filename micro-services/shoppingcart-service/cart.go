@@ -16,6 +16,7 @@ import (
 	"github.com/go-redis/redis/v8"
 	"github.com/google/uuid"
 	"github.com/gorilla/mux"
+	"github.com/joho/godotenv"
 )
 
 type CartItem struct {
@@ -43,10 +44,21 @@ var (
 	orderSvcEndpoint = os.Getenv("ORDER_SERVICE_URL")   // e.g. http://order-service:8002/api/v1/orders
 )
 
+func init() {
+	// Load environment variables from .env file
+	if err := godotenv.Load(); err != nil {
+		log.Fatalf("Error loading .env file")
+	}
+
+	// Initialize Redis and SNS client
+	initRedis()
+	initSNS()
+}
+
 func initRedis() {
 	rdb = redis.NewClient(&redis.Options{
-		Addr:     "localhost:6379",
-		Password: "",
+		Addr:     os.Getenv("REDIS_ADDR"),
+		Password: os.Getenv("REDIS_PASSWORD"),
 		DB:       0,
 	})
 }
@@ -153,19 +165,19 @@ func checkout(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
-	initRedis()
-	initSNS()
-
+	// Initialize Router and define API routes with versioning
 	r := mux.NewRouter()
 	api := r.PathPrefix("/api/v1").Subrouter()
 
+	// Define routes for cart operations
 	api.HandleFunc("/cart/{user_id}", addToCart).Methods("POST")
 	api.HandleFunc("/cart/{user_id}", getCart).Methods("GET")
 	api.HandleFunc("/cart/{user_id}/checkout", checkout).Methods("POST")
 
+	// Start HTTP Server
 	srv := &http.Server{
 		Handler:      r,
-		Addr:         ":8080",
+		Addr:         ":8080", // Listening on port 8080
 		WriteTimeout: 15 * time.Second,
 		ReadTimeout:  15 * time.Second,
 	}
