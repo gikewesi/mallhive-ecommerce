@@ -1,18 +1,25 @@
-from fastapi import FastAPI, APIRouter, HTTPException
+from fastapi import FastAPI, APIRouter, HTTPException, Request
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 import os
 import stripe
 import boto3
 import base64
 import httpx
+from dotenv import load_dotenv
+
+# ========== Load Environment Variables ==========
+load_dotenv()
 
 # ========== Configuration ==========
-STRIPE_SECRET_KEY = os.getenv("STRIPE_SECRET_KEY", "your_stripe_secret_key_here")
-ORDER_SERVICE_URL = os.getenv("ORDER_SERVICE_URL", "http://order-service/api/v1")
-NOTIFICATION_SERVICE_URL = os.getenv("NOTIFICATION_SERVICE_URL", "http://notification-service/api/v1")
+STRIPE_SECRET_KEY = os.getenv("STRIPE_SECRET_KEY")
+ORDER_SERVICE_URL = os.getenv("ORDER_SERVICE_URL")
+NOTIFICATION_SERVICE_URL = os.getenv("NOTIFICATION_SERVICE_URL")
+CORS_ORIGINS = os.getenv("CORS_ORIGINS", "").split(",")
+AWS_REGION = os.getenv("AWS_REGION", "us-east-1")
 
 stripe.api_key = STRIPE_SECRET_KEY
-kms_client = boto3.client("kms")
+kms_client = boto3.client("kms", region_name=AWS_REGION)
 
 # ========== Models ==========
 class PaymentRequest(BaseModel):
@@ -33,7 +40,7 @@ def validate_order(order_id: str, amount: float):
     response = httpx.get(f"{ORDER_SERVICE_URL}/orders/{order_id}")
     if response.status_code != 200:
         raise Exception("Order not found")
-    if response.json()["amount"] != amount:
+    if response.json().get("amount") != amount:
         raise Exception("Amount mismatch with order")
 
 async def send_notification(email: str, payment_result):
@@ -56,8 +63,22 @@ async def process_payment(req: PaymentRequest):
     return charge
 
 # ========== FastAPI Setup ==========
-app = FastAPI(title="Payment Service", version="1.0")
-router = APIRouter()
+app = FastAPI(
+    title="Payment Service",
+    version="1.0",
+    description="Handles payment processing with Stripe",
+)
+
+# Enable CORS for frontend
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=CORS_ORIGINS,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+router = APIRouter(prefix="/api/v1/payments", tags=["Payments"])
 
 @router.post("/")
 async def handle_payment(req: PaymentRequest):
@@ -68,4 +89,4 @@ async def handle_payment(req: PaymentRequest):
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 
-app.include_router(router, prefix="/api/v1/payments")
+app.include_router(router)
