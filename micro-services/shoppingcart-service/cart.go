@@ -17,6 +17,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/gorilla/mux"
 	"github.com/joho/godotenv"
+	"github.com/rs/cors"
 )
 
 type CartItem struct {
@@ -174,9 +175,12 @@ func main() {
 	api.HandleFunc("/cart/{user_id}", getCart).Methods("GET")
 	api.HandleFunc("/cart/{user_id}/checkout", checkout).Methods("POST")
 
+	// CORS configuration
+	handler := cors.Default().Handler(r)
+
 	// Start HTTP Server
 	srv := &http.Server{
-		Handler:      r,
+		Handler:      handler,
 		Addr:         ":8080", // Listening on port 8080
 		WriteTimeout: 15 * time.Second,
 		ReadTimeout:  15 * time.Second,
