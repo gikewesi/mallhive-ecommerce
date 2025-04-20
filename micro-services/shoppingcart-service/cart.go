@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
@@ -28,18 +29,25 @@ type Cart struct {
 	Items  []CartItem `json:"items"`
 }
 
+type Product struct {
+	ID    string  `json:"id"`
+	Price float64 `json:"price"`
+}
+
 var (
-	rdb         *redis.Client
-	ctx         = context.Background()
-	snsClient   *sns.SNS
-	snsTopicARN = os.Getenv("SNS_TOPIC_ARN")
+	rdb              *redis.Client
+	ctx              = context.Background()
+	snsClient        *sns.SNS
+	snsTopicARN      = os.Getenv("SNS_TOPIC_ARN")
+	productSvcURL    = os.Getenv("PRODUCT_SERVICE_URL") // e.g. http://product-service:8000
+	orderSvcEndpoint = os.Getenv("ORDER_SERVICE_URL")   // e.g. http://order-service:8002/api/v1/orders
 )
 
 func initRedis() {
 	rdb = redis.NewClient(&redis.Options{
 		Addr:     "localhost:6379",
-		Password: "", // no password set
-		DB:       0,  // use default DB
+		Password: "",
+		DB:       0,
 	})
 }
 
@@ -50,13 +58,34 @@ func initSNS() {
 	snsClient = sns.New(sess)
 }
 
+func getProductDetails(productID string) (*Product, error) {
+	resp, err := http.Get(fmt.Sprintf("%s/products/%s", productSvcURL, productID))
+	if err != nil || resp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("failed to fetch product: %s", productID)
+	}
+	defer resp.Body.Close()
+
+	var product Product
+	if err := json.NewDecoder(resp.Body).Decode(&product); err != nil {
+		return nil, err
+	}
+	return &product, nil
+}
+
 func addToCart(w http.ResponseWriter, r *http.Request) {
 	var item CartItem
-	err := json.NewDecoder(r.Body).Decode(&item)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+	if err := json.NewDecoder(r.Body).Decode(&item); err != nil {
+		http.Error(w, "Invalid request", http.StatusBadRequest)
 		return
 	}
+
+	product, err := getProductDetails(item.ProductID)
+	if err != nil {
+		http.Error(w, "Product not found", http.StatusNotFound)
+		return
+	}
+
+	item.Price = product.Price // Update price from product service
 	userID := mux.Vars(r)["user_id"]
 	key := fmt.Sprintf("cart:%s", userID)
 
@@ -72,10 +101,11 @@ func getCart(w http.ResponseWriter, r *http.Request) {
 
 	entries, err := rdb.HGetAll(ctx, key).Result()
 	if err != nil {
-		http.Error(w, "Could not fetch cart", http.StatusInternalServerError)
+		http.Error(w, "Failed to get cart", http.StatusInternalServerError)
 		return
 	}
-	items := []CartItem{}
+
+	var items []CartItem
 	for _, val := range entries {
 		var item CartItem
 		json.Unmarshal([]byte(val), &item)
@@ -94,26 +124,32 @@ func checkout(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	items := []CartItem{}
+	var items []CartItem
 	for _, val := range entries {
 		var item CartItem
 		json.Unmarshal([]byte(val), &item)
 		items = append(items, item)
 	}
 
-	orderData, _ := json.Marshal(Cart{UserID: userID, Items: items})
-	_, err = snsClient.Publish(&sns.PublishInput{
-		Message:  aws.String(string(orderData)),
-		TopicArn: aws.String(snsTopicARN),
-	})
-	if err != nil {
-		http.Error(w, "Failed to publish checkout event", http.StatusInternalServerError)
+	cart := Cart{UserID: userID, Items: items}
+	orderPayload, _ := json.Marshal(cart)
+
+	// Send order to Order Microservice
+	resp, err := http.Post(orderSvcEndpoint, "application/json", bytes.NewBuffer(orderPayload))
+	if err != nil || resp.StatusCode != http.StatusCreated {
+		http.Error(w, "Failed to place order", http.StatusInternalServerError)
 		return
 	}
 
-	rdb.Del(ctx, key)
+	// Optional: also publish to SNS topic
+	snsClient.Publish(&sns.PublishInput{
+		Message:  aws.String(string(orderPayload)),
+		TopicArn: aws.String(snsTopicARN),
+	})
+
+	rdb.Del(ctx, key) // Clear cart
 	w.WriteHeader(http.StatusOK)
-	w.Write([]byte("Checkout complete and event sent."))
+	w.Write([]byte("Order placed successfully."))
 }
 
 func main() {
@@ -122,8 +158,9 @@ func main() {
 
 	r := mux.NewRouter()
 	api := r.PathPrefix("/api/v1").Subrouter()
-	api.HandleFunc("/cart/{user_id}", getCart).Methods("GET")
+
 	api.HandleFunc("/cart/{user_id}", addToCart).Methods("POST")
+	api.HandleFunc("/cart/{user_id}", getCart).Methods("GET")
 	api.HandleFunc("/cart/{user_id}/checkout", checkout).Methods("POST")
 
 	srv := &http.Server{
@@ -132,6 +169,6 @@ func main() {
 		WriteTimeout: 15 * time.Second,
 		ReadTimeout:  15 * time.Second,
 	}
-	log.Println("Shopping Cart service running on port 8080")
+	log.Println("Shopping Cart Service running on port 8080")
 	log.Fatal(srv.ListenAndServe())
 }
