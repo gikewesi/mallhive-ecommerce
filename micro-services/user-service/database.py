@@ -4,22 +4,19 @@ from passlib.context import CryptContext
 from dotenv import load_dotenv
 import os
 
-# Load environment variables from .env file
+# Load environment variables
 load_dotenv()
 
-# Database Configuration
-DATABASE_URL = os.getenv("DATABASE_URL")
+# Load from .env or use default fallback
+DATABASE_URL = os.getenv("DATABASE_URL", "postgresql://username:password@localhost:5432/auth_db")
 
-# Create SQLAlchemy Engine
+# SQLAlchemy Engine
 engine = create_engine(DATABASE_URL)
-
-# Create a session for database transactions
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
-# Base class for defining models
 Base = declarative_base()
 
-# Password hashing context
+# Password hashing
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 # -------------------------
@@ -35,11 +32,10 @@ class User(Base):
     hashed_password = Column(String, nullable=False)
 
 # -------------------------
-# ✅ Database CRUD Operations
+# ✅ CRUD Functions
 # -------------------------
 
 def get_db():
-    """ Dependency to get a database session """
     db = SessionLocal()
     try:
         yield db
@@ -47,11 +43,9 @@ def get_db():
         db.close()
 
 def get_user_by_email(db: Session, email: str):
-    """ Retrieve user by email """
     return db.query(User).filter(User.email == email).first()
 
 def create_user(db: Session, username: str, email: str, password: str):
-    """ Create a new user with a hashed password """
     hashed_password = pwd_context.hash(password)
     db_user = User(username=username, email=email, hashed_password=hashed_password)
     db.add(db_user)
