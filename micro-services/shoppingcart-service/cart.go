@@ -8,6 +8,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
@@ -40,9 +41,9 @@ var (
 	rdb              *redis.Client
 	ctx              = context.Background()
 	snsClient        *sns.SNS
-	snsTopicARN      = os.Getenv("SNS_TOPIC_ARN")
-	productSvcURL    = os.Getenv("PRODUCT_SERVICE_URL") // e.g. http://product-service:8000
-	orderSvcEndpoint = os.Getenv("ORDER_SERVICE_URL")   // e.g. http://order-service:8002/api/v1/orders
+	snsTopicARN      = ""
+	productSvcURL    = ""
+	orderSvcEndpoint = ""
 )
 
 func init() {
@@ -50,6 +51,10 @@ func init() {
 	if err := godotenv.Load(); err != nil {
 		log.Fatalf("Error loading .env file")
 	}
+
+	snsTopicARN = os.Getenv("SNS_TOPIC_ARN")
+	productSvcURL = os.Getenv("PRODUCT_SERVICE_URL")
+	orderSvcEndpoint = os.Getenv("ORDER_SERVICE_URL")
 
 	// Initialize Redis and SNS client
 	initRedis()
@@ -66,13 +71,18 @@ func initRedis() {
 
 func initSNS() {
 	sess := session.Must(session.NewSession(&aws.Config{
-		Region: aws.String("us-east-1"),
+		Region: aws.String(os.Getenv("AWS_REGION")),
 	}))
 	snsClient = sns.New(sess)
 }
 
+func getAllowedOrigins() []string {
+	origins := os.Getenv("CORS_ORIGINS")
+	return strings.Split(origins, ",")
+}
+
 func getProductDetails(productID string) (*Product, error) {
-	resp, err := http.Get(fmt.Sprintf("%s/products/%s", productSvcURL, productID))
+	resp, err := http.Get(fmt.Sprintf("%s/%s", productSvcURL, productID))
 	if err != nil || resp.StatusCode != http.StatusOK {
 		return nil, fmt.Errorf("failed to fetch product: %s", productID)
 	}
@@ -98,7 +108,7 @@ func addToCart(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	item.Price = product.Price // Update price from product service
+	item.Price = product.Price
 	userID := mux.Vars(r)["user_id"]
 	key := fmt.Sprintf("cart:%s", userID)
 
@@ -154,37 +164,39 @@ func checkout(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Optional: also publish to SNS topic
+	// Optional: publish to SNS topic
 	snsClient.Publish(&sns.PublishInput{
 		Message:  aws.String(string(orderPayload)),
 		TopicArn: aws.String(snsTopicARN),
 	})
 
-	rdb.Del(ctx, key) // Clear cart
+	rdb.Del(ctx, key)
 	w.WriteHeader(http.StatusOK)
 	w.Write([]byte("Order placed successfully."))
 }
 
 func main() {
-	// Initialize Router and define API routes with versioning
 	r := mux.NewRouter()
 	api := r.PathPrefix("/api/v1").Subrouter()
 
-	// Define routes for cart operations
 	api.HandleFunc("/cart/{user_id}", addToCart).Methods("POST")
 	api.HandleFunc("/cart/{user_id}", getCart).Methods("GET")
 	api.HandleFunc("/cart/{user_id}/checkout", checkout).Methods("POST")
 
-	// CORS configuration
-	handler := cors.Default().Handler(r)
+	// Integrate CORS
+	handler := cors.New(cors.Options{
+		AllowedOrigins: getAllowedOrigins(),
+		AllowedMethods: []string{"GET", "POST", "OPTIONS"},
+		AllowedHeaders: []string{"Content-Type", "Authorization"},
+	}).Handler(r)
 
-	// Start HTTP Server
 	srv := &http.Server{
 		Handler:      handler,
-		Addr:         ":8080", // Listening on port 8080
+		Addr:         ":8080",
 		WriteTimeout: 15 * time.Second,
 		ReadTimeout:  15 * time.Second,
 	}
+
 	log.Println("Shopping Cart Service running on port 8080")
 	log.Fatal(srv.ListenAndServe())
 }
