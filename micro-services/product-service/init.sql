@@ -24,15 +24,16 @@ CREATE TABLE IF NOT EXISTS inventories (
     quantity INTEGER NOT NULL DEFAULT 0
 );
 
--- Insert categories (with slugs)
+-- Insert categories
 INSERT INTO categories (name, slug) VALUES
 ('Electronics', 'electronics'),
 ('Clothing', 'clothing'),
 ('Books', 'books'),
 ('Furniture', 'furniture'),
-('Fashion', 'fashion');
+('Fashion', 'fashion')
+ON CONFLICT DO NOTHING;
 
--- Insert products using category IDs
+-- Insert products
 INSERT INTO products (name, slug, category_id, price, available, description, imageURL)
 VALUES
 ('iPhone 15', 'iphone-15', (SELECT id FROM categories WHERE name = 'Electronics'), 999.99, TRUE, 'Latest Apple iPhone.', 'https://example.com/iphone15.jpg'),
@@ -42,8 +43,10 @@ VALUES
 ('Laptop', 'laptop', (SELECT id FROM categories WHERE name = 'Electronics'), 999.99, TRUE, 'Basic business laptop.', 'https://example.com/laptop.jpg'),
 ('Smartphone', 'smartphone', (SELECT id FROM categories WHERE name = 'Electronics'), 699.99, TRUE, 'Android smartphone.', 'https://example.com/smartphone.jpg'),
 ('T-Shirt', 't-shirt', (SELECT id FROM categories WHERE name = 'Clothing'), 19.99, TRUE, 'Comfortable cotton shirt.', 'https://example.com/tshirt.jpg'),
-('Fiction Book', 'fiction-book', (SELECT id FROM categories WHERE name = 'Books'), 12.99, FALSE, 'Bestselling fiction novel.', 'https://example.com/book.jpg');
+('Fiction Book', 'fiction-book', (SELECT id FROM categories WHERE name = 'Books'), 12.99, FALSE, 'Bestselling fiction novel.', 'https://example.com/book.jpg')
+ON CONFLICT DO NOTHING;
 
--- Insert inventory (with example stock quantities)
+-- Insert inventory (random quantities)
 INSERT INTO inventories (product_id, quantity)
-SELECT id, FLOOR(RANDOM() * 100)::INT FROM products;
+SELECT id, FLOOR(RANDOM() * 100)::INT FROM products
+ON CONFLICT DO NOTHING;
