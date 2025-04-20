@@ -1,10 +1,14 @@
 from sqlalchemy import create_engine, Column, Integer, String
 from sqlalchemy.orm import sessionmaker, declarative_base, Session
 from passlib.context import CryptContext
+from dotenv import load_dotenv
 import os
 
-# Load database credentials from environment variables
-DATABASE_URL = os.getenv("DATABASE_URL", "postgresql://username:password@your-db-instance.rds.amazonaws.com:5432/auth_db")
+# Load environment variables from .env file
+load_dotenv()
+
+# Database Configuration
+DATABASE_URL = os.getenv("DATABASE_URL")
 
 # Create SQLAlchemy Engine
 engine = create_engine(DATABASE_URL)
