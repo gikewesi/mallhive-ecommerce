@@ -1,200 +1,145 @@
 package main
 
 import (
-	"github.com/gin-gonic/gin"
-	"github.com/joho/godotenv"
-	"gorm.io/driver/postgres"
-	"gorm.io/gorm"
-	"gorm.io/gorm/logger"
-
+	"bytes"
+	"context"
+	"database/sql"
+	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
 	"os"
-	"strings"
+
+	"github.com/joho/godotenv"
+	_ "github.com/lib/pq"
+	"github.com/opensearch-project/opensearch-go"
 )
 
 type Product struct {
-	ID          uint      `gorm:"primaryKey" json:"id"`
-	Name        string    `gorm:"unique;not null" json:"name"`
-	Slug        string    `gorm:"unique;not null" json:"slug"`
-	CategoryID  uint      `json:"categoryId"`
-	Price       float64   `json:"price"`
-	Available   bool      `json:"available"`
-	Description string    `json:"description"`
-	ImageURL    string    `json:"imageURL"`
-	Category    Category  `json:"category"`
-	Inventory   Inventory `json:"inventory"`
+	ID          int     `json:"id"`
+	Name        string  `json:"name"`
+	Description string  `json:"description"`
+	Category    string  `json:"category"`
+	Price       float64 `json:"price"`
+	Available   bool    `json:"available"`
 }
 
-type Category struct {
-	ID   uint   `gorm:"primaryKey" json:"id"`
-	Name string `gorm:"unique;not null" json:"name"`
-	Slug string `gorm:"unique;not null" json:"slug"`
-}
-
-type Inventory struct {
-	ID        uint `gorm:"primaryKey" json:"id"`
-	ProductID uint `json:"productId"`
-	Quantity  int  `json:"stockQuantity"`
-}
-
-var db *gorm.DB
+var db *sql.DB
+var searchClient *opensearch.Client
 
 func main() {
-	_ = godotenv.Load()
-
-	dsn := os.Getenv("DB_DSN")
-	if dsn == "" {
-		dsn = "host=localhost user=mallhive password=yourpassword dbname=mallhive_products port=5432 sslmode=disable"
+	// Load environment variables
+	if err := godotenv.Load(); err != nil {
+		log.Fatal("❌ Error loading .env file")
 	}
 
+	// Connect to PostgreSQL
 	var err error
-	db, err = gorm.Open(postgres.Open(dsn), &gorm.Config{Logger: logger.Default.LogMode(logger.Silent)})
+	db, err = sql.Open("postgres", fmt.Sprintf(
+		"host=%s port=%s user=%s password=%s dbname=%s sslmode=disable",
+		os.Getenv("DB_HOST"),
+		os.Getenv("DB_PORT"),
+		os.Getenv("DB_USER"),
+		os.Getenv("DB_PASSWORD"),
+		os.Getenv("DB_NAME"),
+	))
 	if err != nil {
-		log.Fatal("failed to connect to database: ", err)
+		log.Fatal("❌ Database connection error:", err)
 	}
 
-	// Migrate schema
-	db.AutoMigrate(&Product{}, &Category{}, &Inventory{})
-
-	r := gin.Default()
-	r.Use(corsMiddleware())
-
-	// Product routes
-	r.GET("/products", listProducts)
-	r.GET("/products/:slug", getProductBySlug)
-	r.POST("/products", createProduct)
-
-	// Category routes
-	r.GET("/categories", listCategories)
-	r.POST("/categories", createCategory)
-
-	// Order forwarding
-	r.POST("/orders", forwardToOrderService)
-
-	// Run the server
-	r.Run(":8080")
-}
-
-// -------- Product Handlers --------
-
-func listProducts(c *gin.Context) {
-	var products []Product
-	db.Preload("Category").Preload("Inventory").Find(&products)
-	c.JSON(http.StatusOK, products)
-}
-
-func getProductBySlug(c *gin.Context) {
-	slug := c.Param("slug")
-	var product Product
-	result := db.Preload("Category").Preload("Inventory").Where("slug = ?", slug).First(&product)
-	if result.Error != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "Product not found"})
-		return
-	}
-	c.JSON(http.StatusOK, product)
-}
-
-func createProduct(c *gin.Context) {
-	var input struct {
-		Name        string  `json:"name" binding:"required"`
-		CategoryID  uint    `json:"categoryId" binding:"required"`
-		Price       float64 `json:"price" binding:"required"`
-		Available   bool    `json:"available"`
-		Description string  `json:"description"`
-		ImageURL    string  `json:"imageURL"`
-		StockQty    int     `json:"stockQuantity"`
-	}
-	if err := c.ShouldBindJSON(&input); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
-	}
-
-	slug := slugify(input.Name)
-
-	product := Product{
-		Name:        input.Name,
-		Slug:        slug,
-		CategoryID:  input.CategoryID,
-		Price:       input.Price,
-		Available:   input.Available,
-		Description: input.Description,
-		ImageURL:    input.ImageURL,
-	}
-
-	if err := db.Create(&product).Error; err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Failed to create product", "details": err.Error()})
-		return
-	}
-
-	// Create inventory record
-	inventory := Inventory{
-		ProductID: product.ID,
-		Quantity:  input.StockQty,
-	}
-	db.Create(&inventory)
-
-	// Fetch full product with relations to return
-	db.Preload("Category").Preload("Inventory").First(&product, product.ID)
-
-	c.JSON(http.StatusCreated, product)
-}
-
-// -------- Category Handlers --------
-
-func listCategories(c *gin.Context) {
-	var categories []Category
-	db.Find(&categories)
-	c.JSON(http.StatusOK, categories)
-}
-
-func createCategory(c *gin.Context) {
-	var input Category
-	if err := c.ShouldBindJSON(&input); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
-	}
-
-	input.Slug = slugify(input.Name)
-
-	if err := db.Create(&input).Error; err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Failed to create category", "details": err.Error()})
-		return
-	}
-
-	c.JSON(http.StatusCreated, input)
-}
-
-// -------- Order Forwarding --------
-
-func forwardToOrderService(c *gin.Context) {
-	resp, err := http.Post("http://mallhive.com/orders", "application/json", c.Request.Body)
+	// Connect to OpenSearch
+	searchClient, err = opensearch.NewClient(opensearch.Config{
+		Addresses: []string{os.Getenv("OPENSEARCH_URL")},
+	})
 	if err != nil {
-		c.JSON(http.StatusServiceUnavailable, gin.H{"error": "Order service unreachable"})
-		return
+		log.Fatal("❌ OpenSearch connection error:", err)
 	}
-	defer resp.Body.Close()
 
-	c.JSON(resp.StatusCode, gin.H{"message": "Order forwarded successfully"})
+	// REST routes
+	http.HandleFunc("/products", productHandler)
+
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8080"
+	}
+
+	log.Printf("🚀 Server listening on port %s\n", port)
+	log.Fatal(http.ListenAndServe(":"+port, nil))
 }
 
-// -------- Helpers --------
+func productHandler(w http.ResponseWriter, r *http.Request) {
+	switch r.Method {
+	case http.MethodGet:
+		rows, err := db.Query("SELECT id, name, description, category, price, available FROM products")
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		defer rows.Close()
 
-func slugify(input string) string {
-	return strings.ToLower(strings.ReplaceAll(input, " ", "-"))
-}
+		var products []Product
+		for rows.Next() {
+			var p Product
+			rows.Scan(&p.ID, &p.Name, &p.Description, &p.Category, &p.Price, &p.Available)
+			products = append(products, p)
+		}
+		json.NewEncoder(w).Encode(products)
 
-func corsMiddleware() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		c.Writer.Header().Set("Access-Control-Allow-Origin", "*") // You can change "*" to your frontend domain
-		c.Writer.Header().Set("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
-		c.Writer.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
-
-		if c.Request.Method == "OPTIONS" {
-			c.AbortWithStatus(http.StatusNoContent)
+	case http.MethodPost:
+		var p Product
+		if err := json.NewDecoder(r.Body).Decode(&p); err != nil {
+			http.Error(w, "Invalid input", http.StatusBadRequest)
 			return
 		}
 
-		c.Next()
+		err := db.QueryRow(`
+            INSERT INTO products (name, description, category, price, available)
+            VALUES ($1, $2, $3, $4, $5) RETURNING id
+        `, p.Name, p.Description, p.Category, p.Price, p.Available).Scan(&p.ID)
+
+		if err != nil {
+			http.Error(w, "Database insert failed", http.StatusInternalServerError)
+			return
+		}
+
+		// Send to OpenSearch
+		IndexToOpenSearch(p)
+
+		// Notify other services
+		NotifyExternalServices(p)
+
+		w.WriteHeader(http.StatusCreated)
+		json.NewEncoder(w).Encode(p)
+	default:
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
 	}
+}
+
+func IndexToOpenSearch(p Product) {
+	data, _ := json.Marshal(p)
+	res, err := searchClient.Index(
+		"products",
+		bytes.NewReader(data),
+		searchClient.Index.WithDocumentID(fmt.Sprint(p.ID)),
+		searchClient.Index.WithContext(context.Background()),
+	)
+	if err != nil {
+		log.Println("❌ OpenSearch index error:", err)
+		return
+	}
+	defer res.Body.Close()
+	log.Println("✅ Product indexed in OpenSearch")
+}
+
+func NotifyExternalServices(p Product) {
+	cartURL := os.Getenv("CART_SERVICE_URL")
+	orderURL := os.Getenv("ORDER_SERVICE_URL")
+
+	payload, _ := json.Marshal(p)
+	// Notify Shopping Cart
+	http.Post(cartURL+"/products/sync", "application/json", bytes.NewReader(payload))
+	// Notify Order Service
+	http.Post(orderURL+"/products/sync", "application/json", bytes.NewReader(payload))
+
+	log.Println("📡 Product sync notifications sent")
 }
