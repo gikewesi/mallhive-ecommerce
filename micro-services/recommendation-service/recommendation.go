@@ -116,8 +116,8 @@ func callSageMaker(userID string, profile map[string]string) []string {
 
 	req.Header.Set("Content-Type", "application/json")
 
-	// NOTE: You’ll need to use AWS SDK to sign this request (SigV4).
-	// Here it’s mocked, assuming it’s publicly accessible or proxied.
+	// NOTE: You'll need to use AWS SDK to sign this request (SigV4).
+	// Here it's mocked, assuming it's publicly accessible or proxied.
 
 	client := &http.Client{}
 	resp, err := client.Do(req)
@@ -165,6 +165,18 @@ func searchHandler(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"results": results})
 }
 
+// NEW: Recommendation Endpoint
+func recommendationHandler(c *gin.Context) {
+	userID := c.Query("user_id")
+	profile := getUserProfile(userID)
+	recommendations := callSageMaker(userID, profile)
+	c.JSON(http.StatusOK, gin.H{
+		"user_id":         userID,
+		"profile":         profile,
+		"recommendations": recommendations,
+	})
+}
+
 // Main function
 func main() {
 	initEnv()
@@ -174,6 +186,8 @@ func main() {
 
 	router := gin.Default()
 	router.GET("/search", searchHandler)
+	// Register the new recommendations endpoint
+	router.GET("/recommendations", recommendationHandler)
 
 	port := os.Getenv("PORT")
 	if port == "" {
