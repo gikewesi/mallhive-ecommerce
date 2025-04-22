@@ -243,7 +243,7 @@ func sendToEventBridge(order Order) {
 	detail, _ := json.Marshal(order)
 
 	_, err := eventBridgeClient.PutEvents(&eventbridge.PutEventsInput{
-		Entrées: []*eventbridge.PutEventsRequestEntry{{
+		Entries: []*eventbridge.PutEventsRequestEntry{{
 			Source:       aws.String("order-service"),
 			Detail:       aws.String(string(detail)),
 			DetailType:   aws.String("OrderCreated"),
