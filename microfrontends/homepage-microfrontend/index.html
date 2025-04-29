@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Mallhive - Home</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div id="jm">
+    <!-- Top Banner -->
+    <div class="banner">
+      Deal of the month - Save BIG!
+    </div>
+    <!-- Header -->
+    <header class="header">
+      <a href="/" class="logo-link">
+        <img src="images/Mallhive-logo.png" alt="Mallhive Logo" class="logo">
+      </a>
+      <form class="search-bar" onsubmit="event.preventDefault(); goToProductMicrofrontend();">
+        <input type="text" id="searchInput" placeholder="Search products, brands and categories" />
+        <button type="submit">Search</button>
+      </form>
+      <nav class="nav-links">
+        <a href="#" id="userProfileLink">Hi, Gini</a>
+        <a href="#" id="helpLink">Help</a>
+        <a href="/home/miracle/project1/mallhive-ecommerce/microfrontends/shoppingcart-microfrontend/index.html" id="cartLink">Cart</a>
+      </nav>
+    </header>
+    <!-- Main Content -->
+    <main>
+      <aside class="sidebar">
+        <ul>
+          <li><a href="#" class="category-link" data-category="appliances">Appliances</a></li>
+          <li><a href="#" class="category-link" data-category="phones-tablets">Phones & Tablets</a></li>
+          <li><a href="#" class="category-link" data-category="health-beauty">Health & Beauty</a></li>
+          <li><a href="#" class="category-link" data-category="home-office">Home & Office</a></li>
+          <li><a href="#" class="category-link" data-category="electronics">Electronics</a></li>
+          <li><a href="#" class="category-link" data-category="fashion">Fashion</a></li>
+          <li><a href="#" class="category-link" data-category="supermarket">Supermarket</a></li>
+          <li><a href="#" class="category-link" data-category="computing">Computing</a></li>
+          <li><a href="#" class="category-link" data-category="baby-products">Baby Products</a></li>
+          <li><a href="#" class="category-link" data-category="gaming">Gaming</a></li>
+          <li><a href="#" class="category-link" data-category="musical-instruments">Musical Instruments</a></li>
+          <li><a href="#" class="category-link" data-category="other-categories">Other categories</a></li>
+        </ul>
+      </aside>
+      <section class="main-content">
+        <!-- Hero Banner -->
+        <div class="hero-banner">
+          <img src="images/ester.png" alt="EASTER SKINCARE TREATS UP TO 40% OFF">
+        </div>
+        <!-- Promo Categories -->
+        <div class="promo-categories">
+          <a href="#" class="promo" style="background:#ff4444;">
+            <img src="deal-of-the-month.jpg" alt="Deal of the Month" style="width:100%; height:auto;">
+            Deal of the Month
+          </a>
+          <a href="#" class="promo" style="background:#f1f1f1; color:#333;">
+            <img src="images/tv&deals.png" alt="TV & Audio Deals" style="width:100%; height:auto;">
+            TV & Audio Deals
+          </a>
+          <a href="#" class="promo" style="background:#ffbb33; color:#333;">
+            <img src="images/buy2.png" alt="BUY 2 PAY FOR 1" style="width:100%; height:auto;">
+            BUY 2 PAY FOR 1
+          </a>
+          <a href="#" class="promo" style="background:#33b5e5;">
+            <img src="images/phones.png" alt="Phones & Tablets Deals" style="width:100%; height:auto;">
+            Phones & Tablets Deals
+          </a>
+          <a href="#" class="promo" style="background:#00C851;">
+            <img src="images/clearance.png" alt="Up to 80% Off" style="width:100%; height:auto;">
+            Up to 80% Off
+          </a>
+          <a href="#" class="promo" style="background:#aa66cc;">
+            <img src="images/appliances.png" alt="Appliances Deals" style="width:100%; height:auto;">
+            Appliances Deals
+          </a>
+        </div>
+                <!-- Flash Sale -->
+        <div class="flash-sale">
+          <span><b>Flash Sale</b></span>
+          <span class="timer">Time Left: 11h : 40m : 57s</span>
+          <a href="#" class="see-all">See All</a>
+        </div>
+        <!-- Sponsored Products -->
+        <div class="section-heading">Sponsored products</div>
+        <div class="product-grid">
+          <div class="product-card" data-product-id="1001">
+            <img src="images/TV.png" alt="TV">
+            <div class="product-info">
+              <span class="discount">-18%</span>
+              <span class="title">Hikers 32" Frameless Android Smart TV</span>
+              <span class="price">$121</span>
+              <span class="old-price">$146</span>
+            </div>
+          </div>
+          <div class="product-card" data-product-id="1002">
+            <img src="images/humidifier.png" alt="Humidifier">
+            <div class="product-info">
+              <span class="discount">-4%</span>
+              <span class="title">Snowsea 8kg Double Sprayer Humidifier</span>
+              <span class="price">$179</span>
+              <span class="old-price">$188</span>
+            </div>
+          </div>
+          <div class="product-card" data-product-id="1003">
+            <img src="images/Nivea.png" alt="Nivea">
+            <div class="product-info">
+              <span class="discount">-22%</span>
+              <span class="title">NIVEA Perfect & Radiant Body Lotion</span>
+              <span class="price">$23</span>
+              <span class="old-price">$29</span>
+            </div>
+          </div>
+          <div class="product-card" data-product-id="1004">
+            <img src="images/hollyland.png" alt="Microphone">
+            <div class="product-info">
+              <span class="discount">-50%</span>
+              <span class="title">Hollyland Lark M1 Wireless Microphone</span>
+              <span class="price">$88</span>
+              <span class="old-price">$179</span>
+            </div>
+          </div>
+          <div class="product-card" data-product-id="1005">
+            <img src="images/microwave.png" alt="Microwave">
+            <div class="product-info">
+              <span class="discount">-20%</span>
+              <span class="title">Glamstar 20 Litres Digital Microwave</span>
+              <span class="price">$72</span>
+              <span class="old-price">$90</span>
+            </div>
+          </div>
+          <div class="product-card" data-product-id="1006">
+            <img src="images/burner.png" alt="Gas Cooker">
+            <div class="product-info">
+              <span class="discount">-15%</span>
+              <span class="title">Boscon Auto Ignition Gas Cooker</span>
+              <span class="price">$17</span>
+              <span class="old-price">$20</span>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+  <script src="product.js"></script>
+</body>
+</html>

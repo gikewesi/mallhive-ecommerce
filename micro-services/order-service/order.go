@@ -83,7 +83,6 @@ func init() {
 	if err != nil {
 		log.Fatal("Failed to create AWS session:", err)
 	}
-
 	sqsClient = sqs.New(sess)
 	eventBridgeClient = eventbridge.New(sess)
 }
@@ -194,7 +193,6 @@ func paymentCallbackHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Invalid JSON", http.StatusBadRequest)
 		return
 	}
-
 	if callback.OrderID == 0 {
 		http.Error(w, "Missing order_id", http.StatusBadRequest)
 		return
@@ -402,7 +400,6 @@ func sendToSQS(order Order) {
 func sendToEventBridge(order Order) {
 	eventBus := os.Getenv("EVENT_BUS_NAME")
 	detail, _ := json.Marshal(order)
-
 	_, err := eventBridgeClient.PutEvents(&eventbridge.PutEventsInput{
 		Entries: []*eventbridge.PutEventsRequestEntry{{
 			Source:       aws.String("order-service"),

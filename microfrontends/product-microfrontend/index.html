@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mallhive - Product Details</title>
+  <link rel="stylesheet" href="product.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+  <!-- Header (Consistent with other microfrontends) -->
+  <header class="header">
+    <a href="/" class="logo">
+      <img src="images/Mallhive-logo.png" alt="Mallhive">
+    </a>
+    <div class="search-container">
+      <input type="text" placeholder="Search products, brands and categories">
+      <button class="search-btn">Search</button>
+    </div>
+    <div class="user-actions">
+      <!-- User Profile link modified to point to user-profile/index.html -->
+      <a href="http://localhost:3500" class="action-item" id="userProfileLink">
+        <i class="fas fa-user"></i>
+        <span>Hi, Gini</span>
+      </a>
+      <a href="#" class="action-item">
+        <i class="fas fa-question-circle"></i>
+        <span>Help</span>
+      </a>
+      <!-- Cart link modified to point to cart/index.html -->
+      <a href="http://localhost:3300" class="action-item" id="cartLink">
+        <i class="fas fa-shopping-cart"></i>
+        <span>Cart</span>
+      </a>      
+    </div>
+  </header>
+
+  <!-- Main Product Content -->
+  <main class="product-container">
+    <!-- Product Gallery -->
+    <section class="product-gallery">
+      <div class="main-image">
+        <img id="mainProductImage" src="images/iphone.png" alt="Iphone 16">
+      </div>
+      <div class="thumbnail-grid" id="thumbnailContainer"></div>
+    </section>
+
+    <!-- Product Details -->
+    <section class="product-details">
+      <h1 id="productTitle">IPhone 16</h1>
+      <div class="product-rating">
+        <div class="stars">
+          <i class="fas fa-star"></i>
+          <i class="fas fa-star"></i>
+          <i class="fas fa-star"></i>
+          <i class="fas fa-star-half-alt"></i>
+          <i class="far fa-star"></i>
+        </div>
+        <span class="rating-count">(152 reviews)</span>
+      </div>
+      
+      <div class="price-container">
+        <span class="current-price" id="productPrice">$ 1500</span>
+        <div class="original-price-container">
+          <span class="original-price" id="originalPrice">$ 2500</span>
+          <span class="discount-percentage" id="discountPercentage">20%</span>
+        </div>
+      </div>
+
+      <div class="product-highlights">
+        <h3>Key Features:</h3>
+        <ul id="productFeatures"></ul>
+      </div>
+
+      <div class="quantity-selector">
+        <label>Quantity:</label>
+        <div class="quantity-controls">
+          <button class="qty-btn" id="decreaseQty">-</button>
+          <input type="number" value="1" min="1" id="productQty">
+          <button class="qty-btn" id="increaseQty">+</button>
+        </div>
+      </div>
+
+      <div class="action-buttons">
+        <!-- Add to Cart button modified to go to cart/index.html -->
+        <a href="http://localhost:3300/index.html" class="add-to-cart-btn" id="addToCartBtn">
+          <i class="fas fa-cart-plus"></i> Add to Cart
+        </a>
+        <!-- Buy Now button modified to go to checkout/index.html -->
+        <a href="http://localhost:3400/index.html" class="buy-now-btn" id="buyNowBtn">
+          <i class="fas fa-bolt"></i> Buy Now
+        </a>
+      </div>
+
+      <div class="delivery-info">
+        <i class="fas fa-truck"></i>
+        <div class="delivery-details">
+          <p>Delivery: <span id="deliveryDates">06 May - 13 May</span></p>
+          <p class="express-badge">MALLHIVE EXPRESS Available</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Product Specifications -->
+    <section class="product-specs">
+      <h2>Specifications</h2>
+      <table id="specsTable">
+        <tbody>
+          <!-- Filled dynamically -->
+        </tbody>
+      </table>
+    </section>
+
+    <!-- Related Products -->
+    <section class="related-products">
+      <h2>Customers also viewed</h2>
+      <div class="related-grid" id="relatedProducts"></div>
+    </section>
+  </main>
+
+  <!-- Scripts -->
+  <script src="https://cdn.mallhive.com/shared/events.js"></script>
+  <script src="product.js"></script>
+</body>
+</html>

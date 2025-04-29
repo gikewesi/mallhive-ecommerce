@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Mallhive - User Profile</title>
+  <link rel="stylesheet" href="/userprofile.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+  <header class="header">
+    <div class="logo-container">
+      <a href="/">
+        <img src="/images/Mallhive-logo.png" alt="Mallhive" class="logo">
+      </a>
+    </div>
+    <div class="search-container">
+      <input type="text" placeholder="Search products, brands and categories" class="search-input">
+      <button id="search-button" class="search-btn">Search</button>
+    </div>
+    <div class="user-actions">
+      <a href="http://localhost:3500" id="user-profile" class="action-item">
+        <i class="fa-solid fa-user"></i>
+        <span>Hi, Gini</span>
+      </a>
+      <a href="/help" class="action-item">
+        <i class="fa-solid fa-circle-question"></i>
+        <span>Help</span>
+      </a>
+      <a href="http://localhost:3300" id="cart" class="action-item">
+        <i class="fa-solid fa-cart-shopping"></i>
+        <span>Cart</span>
+      </a>
+    </div>
+  </header>
+
+  <main class="main-container">
+    <aside class="sidebar">
+      <ul class="nav-menu">
+        <li class="nav-item active"><a href="/userprofile"><i class="fa-solid fa-user"></i> My Mallhive Account</a></li>
+        <li class="nav-item"><a href="/orders"><i class="fa-solid fa-box"></i>  Orders</a></li>
+        <li class="nav-item"><a href="/reviews"><i class="fa-solid fa-star"></i>  Pending Reviews</a></li>
+        <li class="nav-item"><a href="/voucher"><i class="fa-solid fa-ticket"></i>  Voucher</a></li>
+        <li class="nav-item"><a href="/wishlist"><i class="fa-solid fa-heart"></i>  Wishlist</a></li>
+        <li class="nav-item"><a href="/recently-viewed"><i class="fa-solid fa-clock-rotate-left"></i>  Recently Viewed</a></li>
+        <li class="nav-section">Account Management</li>
+        <li class="nav-item"><a href="/payment-settings"><i class="fa-solid fa-credit-card"></i>  Payment Settings</a></li>
+        <li class="nav-item"><a href="/address-book"><i class="fa-solid fa-address-book"></i>  Address Book</a></li>
+        <li class="nav-item"><a href="/newsletter-preferences"><i class="fa-solid fa-envelope"></i>  Newsletter Preferences</a></li>
+        <li class="nav-item"><a href="/close-account"><i class="fa-solid fa-user-slash"></i>  Close Account</a></li>
+        <li class="nav-item logout"><a href="/logout"><i class="fa-solid fa-arrow-right-from-bracket"></i>  Logout</a></li>
+      </ul>
+    </aside>
+
+    <div class="content">
+      <h1>Account Overview</h1>
+      <div class="account-sections">
+        <div class="account-section">
+          <div class="section-header">ACCOUNT DETAILS</div>
+          <div class="section-content">
+            <h3 id="user-fullname">Gini DevOps</h3>
+            <p id="user-email">ginidevops@gmail.com</p>
+          </div>
+        </div>
+        <div class="account-section">
+          <div class="section-header">
+            ADDRESS BOOK
+            <button class="edit-btn" title="Edit Address">✏️</button>
+          </div>
+          <div class="section-content">
+            <h3>Your default shipping address:</h3>
+            <div id="default-address">
+              <p>Gini DevOps</p>
+              <p>marsh addison drive texas 75287</p>
+              <p>United States</p>
+            </div>
+          </div>
+        </div>
+        <div class="account-section">
+          <div class="section-header">MALLHIVE STORE CREDIT</div>
+          <div class="section-content">
+            <p class="store-credit">
+              <span class="credit-label">Mallhive store credit balance:</span>
+              <span class="credit-amount">$ 0</span>
+            </p>
+          </div>
+        </div>
+        <div class="account-section">
+          <div class="section-header">NEWSLETTER PREFERENCES</div>
+          <div class="section-content">
+            <p>Manage your email communications to stay updated with the latest news and offers.</p>
+            <a href="/newsletter-preferences" class="edit-link">Edit Newsletter preferences</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+  <script src="userprofile.js"></script>
+</body>
+</html>

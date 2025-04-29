@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mallhive - Checkout</title>
+  <link rel="stylesheet" href="checkout.css">
+</head>
+<body>
+  <header>
+    <div class="logo">
+      <a href="/">
+        <img src="images/Mallhive-logo.png" alt="Mallhive">
+      </a>
+    </div>
+    <h1 class="page-title">Select payment</h1>
+    <div class="support-options">
+      <div class="support-item">
+        <span class="icon">📞</span>
+        <div class="text">
+          <p>Need Help?</p>
+          <p>Contact us</p>
+        </div>
+      </div>
+      <div class="support-item">
+        <span class="icon">🔄</span>
+        <div class="text">
+          <p>Easy</p>
+          <p>Returns</p>
+        </div>
+      </div>
+      <div class="support-item">
+        <span class="icon">🔒</span>
+        <div class="text">
+          <p>Secure</p>
+          <p>Payments</p>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="checkout-container">
+    <div class="checkout-steps">
+      <!-- Step 1: Customer Address -->
+      <section class="checkout-step completed" id="customer-address">
+        <div class="step-header">
+          <span class="step-number">✓ 1. CUSTOMER ADDRESS</span>
+          <button class="change-btn">Change</button>
+        </div>
+        <div class="step-content">
+          <p id="customer-name">Gini Devops</p>
+          <p id="customer-address-line"> Marsh Texas - Addision United States</p>
+        </div>
+      </section>
+
+      <!-- Step 2: Delivery Details -->
+      <section class="checkout-step completed" id="delivery-details">
+        <div class="step-header">
+          <span class="step-number">✓ 2. DELIVERY DETAILS</span>
+          <button class="change-btn">Change</button>
+        </div>
+        <div class="step-content">
+          <p>Pick-up Station</p>
+          <p>Delivery between <span id="delivery-start-date">06 May</span> and <span id="delivery-end-date">13 May</span>.</p>
+        </div>
+      </section>
+
+      <!-- Step 3: Payment Method -->
+      <section class="checkout-step active" id="payment-method">
+        <div class="step-header">
+          <span class="step-number">3. PAYMENT METHOD</span>
+        </div>
+        <div class="step-content">
+          <h3>Pre-pay Now</h3>
+          
+          <div class="payment-option">
+            <label>
+              <input type="radio" name="payment" value="card_bank_ussd" checked>
+              <span>Pay with Cards, Bank Transfer or USSD</span>
+            </label>
+            <p class="payment-note">You will be redirected to our secure checkout page.</p>
+            
+            <div class="payment-details bank-transfer-details">
+              <div class="store-credit">
+                <span class="store-credit-icon">💳</span>
+                <span>Mallhive store credit balance: $ 0</span>
+              </div>
+              <p class="redirect-note">- Kindly note that you will be redirected to MallhivePay platform to complete your purchase.</p>
+              <div class="payment-footer">
+                <p>Powered by <strong>MallhivePay</strong></p>
+                <div class="accepted-cards">
+                  <span>We accept:</span>
+                  <img src="" alt="Accepted payment methods">
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          
+          <button id="confirm-payment-button" class="confirm-button">Confirm payment method</button>
+        </div>
+      </section>
+    </div>
+    
+    <aside class="order-summary">
+      <h2>Order summary</h2>
+      <div class="summary-item">
+        <span>Item's total (6)</span>
+        <span class="price" id="items-total">$ 35</span>
+      </div>
+      <div class="summary-item">
+        <span>Delivery fees</span>
+        <span class="price" id="delivery-fees">$ 2</span>
+      </div>
+      <div class="summary-item total">
+        <span>Total</span>
+        <span class="price" id="order-total">$ 37</span>
+      </div>
+      
+      <div class="promo-code">
+        <input type="text" placeholder="Enter code here" id="promo-code-input">
+        <button id="apply-promo">APPLY</button>
+      </div>
+      
+      <button id="confirm-order-button" class="confirm-button">Confirm order</button>
+      
+      <p class="order-note">(Complete the steps in order to proceed)</p>
+      
+      <div class="terms-agreement">
+        <p>By proceeding, you are automatically accepting the <a href="#">Terms & Conditions</a></p>
+      </div>
+    </aside>
+  </main>
+
+  <!-- Shared resources for microfrontend communication -->
+  <script src="https://cdn.mallhive.com/shared/events.js"></script>
+  <script src="checkout.js"></script>
+</body>
+</html>

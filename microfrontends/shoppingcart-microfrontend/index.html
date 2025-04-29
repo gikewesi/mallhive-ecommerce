@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Mallhive - Your Shopping Cart</title>
+  <link rel="stylesheet" href="/cart.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+  <header class="header">
+    <div class="logo-container">
+      <a href="/">
+        <img src="/images/Mallhive-logo.png" alt="Mallhive" class="logo">
+      </a>
+    </div>
+
+    <div class="search-container">
+      <input type="text" placeholder="Search products, brands and categories" class="search-input">
+      <button id="search-button" class="search-btn">Search</button>
+    </div>
+
+    <div class="user-actions">
+      <a href="http://localhost:3500" id="user-profile" class="action-item">
+        <i class="fa-solid fa-user"></i>
+        <span>Hi, Gini</span>
+      </a>
+      <a href="#" class="action-item">
+        <i class="fa-solid fa-circle-question"></i>
+        <span>Help</span>
+      </a>
+      <a href="http://localhost:3300" id="cart" class="action-item active">
+        <i class="fa-solid fa-cart-shopping"></i>
+        <span>Cart</span>
+      </a>
+    </div>
+  </header>
+
+  <main class="main-container">
+    <div class="cart-container">
+      <div class="cart-items-section">
+        <h1 id="cart-title">Cart (5)</h1>
+
+        <div id="cart-items">
+          <!-- Cart item 1 -->
+          <div class="cart-item">
+            <div class="item-image">
+              <img src="/images/BLUETOOTH.png" alt="Product 1">
+            </div>
+            <div class="item-details">
+              <h3 class="item-title">Wireless Headphones</h3>
+              <div class="item-info">
+                <span class="stock-status">In Stock</span>
+                <span class="express-badge">MALLHIVE EXPRESS</span>
+              </div>
+              <button class="remove-btn">
+                <i class="fa-solid fa-trash"></i> Remove
+              </button>
+            </div>
+            <div class="item-price-actions">
+              <div class="price-container">
+                <span class="current-price">$99.99</span>
+                <div class="original-price-container">
+                  <span class="original-price">$120.00</span>
+                  <span class="discount-percentage">-17%</span>
+                </div>
+              </div>
+              <div class="quantity-controls">
+                <button class="decrease-btn">-</button>
+                <span class="quantity">1</span>
+                <button class="increase-btn">+</button>
+              </div>
+              <span class="units-left">Only 3 left!</span>
+            </div>
+          </div>
+
+          <!-- Cart item 2 -->
+          <div class="cart-item">
+            <div class="item-image">
+              <img src="/images/WATCH.png" alt="Product 2">
+            </div>
+            <div class="item-details">
+              <h3 class="item-title">Smart Watch</h3>
+              <div class="item-info">
+                <span class="stock-status">In Stock</span>
+                <span class="express-badge">MALLHIVE EXPRESS</span>
+              </div>
+              <button class="remove-btn">
+                <i class="fa-solid fa-trash"></i> Remove
+              </button>
+            </div>
+            <div class="item-price-actions">
+              <div class="price-container">
+                <span class="current-price">$149.99</span>
+                <div class="original-price-container">
+                  <span class="original-price">$180.00</span>
+                  <span class="discount-percentage">-17%</span>
+                </div>
+              </div>
+              <div class="quantity-controls">
+                <button class="decrease-btn">-</button>
+                <span class="quantity">1</span>
+                <button class="increase-btn">+</button>
+              </div>
+              <span class="units-left">Only 5 left!</span>
+            </div>
+          </div>
+
+          <!-- Cart item 3 -->
+          <div class="cart-item">
+            <div class="item-image">
+              <img src="/images/BLUETOOTH.png" alt="Product 3">
+            </div>
+            <div class="item-details">
+              <h3 class="item-title">Bluetooth Speaker</h3>
+              <div class="item-info">
+                <span class="stock-status">In Stock</span>
+                <span class="express-badge">MALLHIVE EXPRESS</span>
+              </div>
+              <button class="remove-btn">
+                <i class="fa-solid fa-trash"></i> Remove
+              </button>
+            </div>
+            <div class="item-price-actions">
+              <div class="price-container">
+                <span class="current-price">$59.99</span>
+                <div class="original-price-container">
+                  <span class="original-price">$70.00</span>
+                  <span class="discount-percentage">-14%</span>
+                </div>
+              </div>
+              <div class="quantity-controls">
+                <button class="decrease-btn">-</button>
+                <span class="quantity">1</span>
+                <button class="increase-btn">+</button>
+              </div>
+              <span class="units-left">Only 2 left!</span>
+            </div>
+          </div>
+
+          <!-- Cart item 4 -->
+          <div class="cart-item">
+            <div class="item-image">
+              <img src="/images/BAGPACK.png" alt="Product 4">
+            </div>
+            <div class="item-details">
+              <h3 class="item-title">Laptop Backpack</h3>
+              <div class="item-info">
+                <span class="stock-status">In Stock</span>
+                <span class="express-badge">MALLHIVE EXPRESS</span>
+              </div>
+              <button class="remove-btn">
+                <i class="fa-solid fa-trash"></i> Remove
+              </button>
+            </div>
+            <div class="item-price-actions">
+              <div class="price-container">
+                <span class="current-price">$39.99</span>
+                <div class="original-price-container">
+                  <span class="original-price">$50.00</span>
+                  <span class="discount-percentage">-20%</span>
+                </div>
+              </div>
+              <div class="quantity-controls">
+                <button class="decrease-btn">-</button>
+                <span class="quantity">1</span>
+                <button class="increase-btn">+</button>
+              </div>
+              <span class="units-left">Only 7 left!</span>
+            </div>
+          </div>
+
+          <!-- Cart item 5 -->
+          <div class="cart-item">
+            <div class="item-image">
+              <img src="/images/PORTABLECHARGER.png" alt="Product 5">
+            </div>
+            <div class="item-details">
+              <h3 class="item-title">Portable Charger</h3>
+              <div class="item-info">
+                <span class="stock-status">In Stock</span>
+                <span class="express-badge">MALLHIVE EXPRESS</span>
+              </div>
+              <button class="remove-btn">
+                <i class="fa-solid fa-trash"></i> Remove
+              </button>
+            </div>
+            <div class="item-price-actions">
+              <div class="price-container">
+                <span class="current-price">$58.51</span>
+                <div class="original-price-container">
+                  <span class="original-price">$65.00</span>
+                  <span class="discount-percentage">-10%</span>
+                </div>
+              </div>
+              <div class="quantity-controls">
+                <button class="decrease-btn">-</button>
+                <span class="quantity">1</span>
+                <button class="increase-btn">+</button>
+              </div>
+              <span class="units-left">Only 4 left!</span>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <div class="cart-summary-section">
+        <div class="summary-box">
+          <h2>CART SUMMARY</h2>
+          <div class="summary-row">
+            <span>Subtotal</span>
+            <span id="subtotal-amount">$408.47</span>
+          </div>
+          <a href="http://localhost:3400" id="checkout-button" class="checkout-btn">
+            Checkout ($408.47)
+          </a>
+        </div>
+      </div>
+    </div>
+  </main>
+</body>
+</html>
