@@ -1,12 +1,12 @@
-FROM golang:1.22-alpine AS builder
+FROM golang:1.23 AS builder
 
 WORKDIR /app
 
-COPY ../../micro-services/order-service/go.mod ../../micro-services/order-service/go.sum ./
+COPY ./go.mod ./go.sum ./
 
 RUN go mod download
 
-COPY ../../micro-services/order-service/ ./
+COPY . ./
 
 RUN go build -o order-service order.go
 

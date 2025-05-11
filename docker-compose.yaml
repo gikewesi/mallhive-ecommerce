@@ -4,10 +4,10 @@ services:
   user-service:
     container_name: user-service
     build:
-      context: ./mallhive-ecommerce/micro-services/user-service
-      dockerfile: ./mallhive-ecommerce/docker/microservices/user.dockerfile
+      context: ./micro-services/user-service
+      dockerfile: ../../docker/microservices/user.dockerfile
     env_file:
-      - ./mallhive-ecommerce/micro-services/user-service/.env
+      - ./micro-services/user-service/.env
     ports:
       - "4600:4001"
     depends_on:
@@ -20,7 +20,7 @@ services:
     image: postgres:15
     container_name: user-db
     env_file:
-      - ./mallhive-ecommerce/docker-compose/env/user-db.env
+      - ./docker-compose/env/user-db.env
     ports:
       - "5430:5432"
     volumes:
@@ -31,10 +31,10 @@ services:
   order-service:
     container_name: order-service
     build:
-      context: ./mallhive-ecommerce/micro-services/order-service
-      dockerfile: Dockerfile
+      context: ./micro-services/order-service
+      dockerfile: ../../docker/microservices/order.dockerfile
     env_file:
-      - ./mallhive-ecommerce/micro-services/order-service/.env
+      - ./micro-services/order-service/.env
     ports:
       - "4200:4002"
     depends_on:
@@ -47,7 +47,7 @@ services:
     image: postgres:15
     container_name: order-db
     env_file:
-      - ./mallhive-ecommerce/docker-compose/env/order-db.env
+      - ./docker-compose/env/order-db.env
     ports:
       - "5440:5432"
     volumes:
@@ -58,10 +58,10 @@ services:
   payment-service:
     container_name: payment-service
     build:
-      context: ./mallhive-ecommerce/micro-services/payment-service
-      dockerfile: ./mallhive-ecommerce/docker/microservices/payment.dockerfile
+      context: ./micro-services/payment-service
+      dockerfile: ../../docker/microservices/payment.dockerfile
     env_file:
-      - ./mallhive-ecommerce/micro-services/payment-service/.env
+      - ./micro-services/payment-service/.env
     ports:
       - "4500:4003"
     restart: always
@@ -71,10 +71,10 @@ services:
   product-service:
     container_name: product-service
     build:
-      context: ./mallhive-ecommerce/micro-services/product-service
-      dockerfile: ./mallhive-ecommerce/docker/microservices/product.dockerfile
+      context: ./micro-services/product-service
+      dockerfile: ../../docker/microservices/product.dockerfile
     env_file:
-      - ./mallhive-ecommerce/micro-services/product-service/.env
+      - ./micro-services/product-service/.env
     ports:
       - "4100:4004"
     depends_on:
@@ -87,7 +87,7 @@ services:
     image: postgres:15
     container_name: product-db
     env_file:
-      - ./mallhive-ecommerce/docker-compose/env/product-db.env
+      - ./docker-compose/env/product-db.env
     ports:
       - "5450:5432"
     volumes:
@@ -98,10 +98,10 @@ services:
   notification-service:
     container_name: notification-service
     build: 
-      context: ./mallhive-ecommerce/micro-services/notification-service
-      dockerfile: ./mallhive-ecommerce/docker/microservices/notification.dockerfile
+      context: ./micro-services/notification-service
+      dockerfile: ../../docker/microservices/notification.dockerfile
     env_file:
-      - ./mallhive-ecommerce/micro-services/notification-service/.env
+      - ./micro-services/notification-service/.env
     ports:
       - "4400:4005"
     restart: always
@@ -111,10 +111,10 @@ services:
   recommendation-service:
     container_name: recommendation-service
     build: 
-      context: ./mallhive-ecommerce/micro-services/recommendation-service
-      dockerfile: ./mallhive-ecommerce/docker/microservices/recommendation.dockerfile
+      context: ./micro-services/recommendation-service
+      dockerfile: ../../docker/microservices/recommendation.dockerfile
     env_file:
-      - ./mallhive-ecommerce/micro-services/recommendation-service/.env
+      - ./micro-services/recommendation-service/.env
     ports:
       - "4700:4006"
     restart: always
@@ -124,10 +124,10 @@ services:
   analytics-service:
     container_name: analytics-service
     build: 
-      context: ./mallhive-ecommerce/micro-services/analytics-service
-      dockerfile: ./mallhive-ecommerce/docker/microservices/analytics.dockerfile
+      context: ./micro-services/analytics-service
+      dockerfile: ../../docker/microservices/analytics.dockerfile
     env_file:
-      - ./mallhive-ecommerce/micro-services/analytics-service/.env
+      - ./micro-services/analytics-service/.env
     ports:
       - "4800:4007"
     restart: always
@@ -137,23 +137,21 @@ services:
   shoppingcart-service:
     container_name: shoppingcart-service
     build: 
-      context: ./mallhive-ecommerce/micro-services/shoppingcart-service
-      dockerfile: ./mallhive-ecommerce/docker/microservices/shoppingcart.dockerfile
+      context: ./micro-services/shoppingcart-service
+      dockerfile: ../../docker/microservices/shoppingcart.dockerfile
     env_file:
-      - ./mallhive-ecommerce/micro-services/shoppingcart-service/.env
+      - ./micro-services/shoppingcart-service/.env
     ports:
       - "4300:4008"
     restart: always
     networks:
       - shoppingcart-net
 
-
-
   checkout-microfrontend:
     container_name: checkout-microfrontend
     build: 
-      context: ./mallhive-ecommerce/micro-frontends/checkout
-      dockerfile: ./mallhive-ecommerce/docker/microfrontends/checkout.dockerfile
+      context: ./microfrontends/checkout-microfrontend
+      dockerfile: ../../docker/microfrontends/checkout.dockerfile
     ports:
       - "3400:3000"
     restart: always
@@ -163,8 +161,8 @@ services:
   homepage-microfrontend:
     container_name: homepage-microfrontend
     build: 
-      context: ./mallhive-ecommerce/micro-frontends/homepage
-      dockerfile: ./mallhive-ecommerce/docker/microfrontends/homepage.dockerfile
+      context: ./microfrontends/homepage-microfrontend
+      dockerfile: ../../docker/microfrontends/homepage.dockerfile
     ports:
       - "3100:3000"
     restart: always
@@ -174,8 +172,8 @@ services:
   product-microfrontend:
     container_name: product-microfrontend
     build: 
-      context: ./mallhive-ecommerce/micro-frontends/product
-      dockerfile: ./mallhive-ecommerce/docker/microfrontends/product.dockerfile
+      context: ./microfrontends/product-microfrontend
+      dockerfile: ../../docker/microfrontends/product.dockerfile
     ports:
       - "3200:3000"
     restart: always
@@ -185,8 +183,8 @@ services:
   shoppingcart-microfrontend:
     container_name: shoppingcart-microfrontend
     build: 
-      context: ./mallhive-ecommerce/micro-frontends/shoppingcart
-      dockerfile: ./mallhive-ecommerce/docker/microfrontends/shoppingcart.dockerfile
+      context: ./microfrontends/shoppingcart-microfrontend
+      dockerfile: ../../docker/microfrontends/shoppingcart.dockerfile
     ports:
       - "3300:3000"
     restart: always
@@ -196,14 +194,13 @@ services:
   userprofile-microfrontend:
     container_name: userprofile-microfrontend
     build: 
-      context: ./mallhive-ecommerce/micro-frontends/userprofile
-      dockerfile: ./mallhive-ecommerce/docker/microfrontends/userprofile.dockerfile
+      context: ./microfrontends/userprofile-microfrontend
+      dockerfile: ../../docker/microfrontends/userprofile.dockerfile
     ports:
       - "3500:3000"
     restart: always
     networks:
       - userprofile-net
- 
 
 volumes:
   user_pgdata:

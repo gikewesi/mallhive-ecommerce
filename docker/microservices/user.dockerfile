@@ -1,16 +1,19 @@
-FROM python:3.9-slim
+FROM python:3.9-slim-bullseye
 
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
 
 WORKDIR /app
 
-COPY ../../micro-services/user-service/requirements.txt .
+# Copy requirements
+COPY requirements.txt .
 
 RUN pip install --no-cache-dir -r requirements.txt
 
-COPY ../../micro-services/user-service/ .
+# Copy the rest of the application
+COPY . .
 
+# Create non-root user
 RUN adduser --disabled-password --gecos '' appuser
 USER appuser
 

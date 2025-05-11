@@ -1,15 +1,14 @@
-FROM golang:1.22-alpine AS builder
+FROM golang:1.23 AS builder
 
 WORKDIR /app
 
-COPY ../../micro-services/recommendation-service/go.mod ../../micro-services/recommendation-service/go.sum ./
+COPY go.mod go.sum ./
 
 RUN go mod download
 
-COPY ../../micro-services/recommendation-service/ ./
+COPY . .
 
 RUN go build -o recommendation-service recommendation.go
-
 
 # -----------------------------
 FROM alpine:latest

@@ -1,15 +1,14 @@
-FROM golang:1.22-alpine AS builder
+FROM golang:1.23 AS builder
 
 WORKDIR /app
 
-COPY ../../micro-services/product-service/go.mod ../../micro-services/product-service/go.sum ./
+COPY go.mod go.sum ./
 
 RUN go mod download
 
-COPY ../../micro-services/product-service/ ./
+COPY . .
 
 RUN go build -o product-service product.go
-
 
 # -----------------------------
 FROM alpine:latest

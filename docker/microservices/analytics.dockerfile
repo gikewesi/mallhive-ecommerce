@@ -1,14 +1,14 @@
-FROM golang:1.22-alpine AS builder
+FROM golang:1.23 AS builder
 
 WORKDIR /app
 
-COPY ../../micro-services/analystics-service/go.mod ../../micro-services/analystics-service/go.sum ./
+COPY go.mod go.sum ./
 
 RUN go mod download
 
-COPY ../../micro-services/analystics-service/ ./
+COPY . .
 
-RUN go build -o analystics-service analystics.go
+RUN go build -o analytics-service analytics.go
 
 
 # -----------------------------
@@ -16,11 +16,11 @@ FROM alpine:latest
 
 WORKDIR /app
 
-RUN adduser -D analysticsuser
-USER analysticsuser
+RUN adduser -D analyticsuser
+USER analyticsuser
 
-COPY --from=builder /app/analystics-service .
+COPY --from=builder /app/analytics-service .
 
 EXPOSE 4800
 
-CMD ["./analystics-service"]
+CMD ["./analytics-service"]
