@@ -27,7 +27,7 @@ jobs:
           password: ${{ secrets.DOCKER_PASSWORD }}
 
       - name: Build images
-        run: make -C mallhive-ecommerce -f Makefile/makefile build
+        run: make -f Makefile/makefile build
 
       - name: Push images
         run: make -C mallhive-ecommerce push
