@@ -14,7 +14,11 @@ down:
 logs:
 	$(DC) logs -f
 
+push:
+    $(DC) push
+
 restart:
 	make down && make up
 
 run: build up logs
+
