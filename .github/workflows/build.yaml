@@ -30,4 +30,4 @@ jobs:
         run: make -f Makefile/makefile build
 
       - name: Push images
-        run: make -C mallhive-ecommerce push
+        run: make -f Makefile/makefile push
