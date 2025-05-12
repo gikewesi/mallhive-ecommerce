@@ -7,8 +7,8 @@ services:
       context: ./micro-services/user-service
       dockerfile: ../../docker/microservices/user.dockerfile
     image: mallhive/user-service:latest
-    env_file:
-      - ./micro-services/user-service/.env
+  #  env_file:
+  #   - ./micro-services/user-service/.env
     ports:
       - "4600:4001"
     depends_on:
@@ -20,8 +20,8 @@ services:
   user-db:
     image: postgres:15
     container_name: user-db
-    env_file:
-      - ./docker-compose/env/user-db.env
+  #  env_file:
+  #   - ./docker-compose/env/user-db.env
     ports:
       - "5430:5432"
     volumes:
@@ -35,8 +35,8 @@ services:
       context: ./micro-services/order-service
       dockerfile: ../../docker/microservices/order.dockerfile
     image: mallhive/uorder-service:latest 
-    env_file:
-      - ./micro-services/order-service/.env
+  #  env_file:
+  #    - ./micro-services/order-service/.env
     ports:
       - "4200:4002"
     depends_on:
@@ -48,8 +48,8 @@ services:
   order-db:
     image: postgres:15
     container_name: order-db
-    env_file:
-      - ./docker-compose/env/order-db.env
+  #  env_file:
+  #    - ./docker-compose/env/order-db.env
     ports:
       - "5440:5432"
     volumes:
@@ -63,8 +63,8 @@ services:
       context: ./micro-services/payment-service
       dockerfile: ../../docker/microservices/payment.dockerfile
     image: mallhive/order-service:latest 
-    env_file:
-      - ./micro-services/payment-service/.env
+  #  env_file:
+  #    - ./micro-services/payment-service/.env
     ports:
       - "4500:4003"
     restart: always
@@ -77,8 +77,8 @@ services:
       context: ./micro-services/product-service
       dockerfile: ../../docker/microservices/product.dockerfile
     image: mallhive/product-service:latest 
-    env_file:
-      - ./micro-services/product-service/.env
+  #  env_file:
+  #    - ./micro-services/product-service/.env
     ports:
       - "4100:4004"
     depends_on:
@@ -90,8 +90,8 @@ services:
   product-db:
     image: postgres:15
     container_name: product-db
-    env_file:
-      - ./docker-compose/env/product-db.env
+  #  env_file:
+  #    - ./docker-compose/env/product-db.env
     ports:
       - "5450:5432"
     volumes:
@@ -105,8 +105,8 @@ services:
       context: ./micro-services/notification-service
       dockerfile: ../../docker/microservices/notification.dockerfile
     image: mallhive/notification-service:latest 
-    env_file:
-      - ./micro-services/notification-service/.env
+  #  env_file:
+  #    - ./micro-services/notification-service/.env
     ports:
       - "4400:4005"
     restart: always
@@ -119,8 +119,8 @@ services:
       context: ./micro-services/recommendation-service
       dockerfile: ../../docker/microservices/recommendation.dockerfile
     image: mallhive/recommendation-service:latest 
-    env_file:
-      - ./micro-services/recommendation-service/.env
+  #  env_file:
+  #    - ./micro-services/recommendation-service/.env
     ports:
       - "4700:4006"
     restart: always
@@ -133,8 +133,8 @@ services:
       context: ./micro-services/analytics-service
       dockerfile: ../../docker/microservices/analytics.dockerfile
     image: mallhive/analytics-service:latest 
-    env_file:
-      - ./micro-services/analytics-service/.env
+  #  env_file:
+  #    - ./micro-services/analytics-service/.env
     ports:
       - "4800:4007"
     restart: always
@@ -147,8 +147,8 @@ services:
       context: ./micro-services/shoppingcart-service
       dockerfile: ../../docker/microservices/shoppingcart.dockerfile
     image: mallhive/shoppingcart-service:latest 
-    env_file:
-      - ./micro-services/shoppingcart-service/.env
+  #  env_file:
+  #    - ./micro-services/shoppingcart-service/.env
     ports:
       - "4300:4008"
     restart: always
