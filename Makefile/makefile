@@ -1,4 +1,4 @@
-DC=docker compose -f ../docker-compose.yaml
+DC=docker compose -f ../mallhive-ecommerce/docker-compose.yaml
 
 .PHONY: build up down logs restart run
 
