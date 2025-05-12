@@ -15,7 +15,7 @@ logs:
 	$(DC) logs -f
 
 push:
-    $(DC) push
+	$(DC) push
 
 restart:
 	make down && make up
