@@ -6,6 +6,7 @@ services:
     build:
       context: ./micro-services/user-service
       dockerfile: ../../docker/microservices/user.dockerfile
+    image: mallhive/user-service:latest
     env_file:
       - ./micro-services/user-service/.env
     ports:
@@ -33,6 +34,7 @@ services:
     build:
       context: ./micro-services/order-service
       dockerfile: ../../docker/microservices/order.dockerfile
+    image: mallhive/uorder-service:latest 
     env_file:
       - ./micro-services/order-service/.env
     ports:
@@ -60,6 +62,7 @@ services:
     build:
       context: ./micro-services/payment-service
       dockerfile: ../../docker/microservices/payment.dockerfile
+    image: mallhive/order-service:latest 
     env_file:
       - ./micro-services/payment-service/.env
     ports:
@@ -73,6 +76,7 @@ services:
     build:
       context: ./micro-services/product-service
       dockerfile: ../../docker/microservices/product.dockerfile
+    image: mallhive/product-service:latest 
     env_file:
       - ./micro-services/product-service/.env
     ports:
@@ -100,6 +104,7 @@ services:
     build: 
       context: ./micro-services/notification-service
       dockerfile: ../../docker/microservices/notification.dockerfile
+    image: mallhive/notification-service:latest 
     env_file:
       - ./micro-services/notification-service/.env
     ports:
@@ -113,6 +118,7 @@ services:
     build: 
       context: ./micro-services/recommendation-service
       dockerfile: ../../docker/microservices/recommendation.dockerfile
+    image: mallhive/recommendation-service:latest 
     env_file:
       - ./micro-services/recommendation-service/.env
     ports:
@@ -126,6 +132,7 @@ services:
     build: 
       context: ./micro-services/analytics-service
       dockerfile: ../../docker/microservices/analytics.dockerfile
+    image: mallhive/analytics-service:latest 
     env_file:
       - ./micro-services/analytics-service/.env
     ports:
@@ -139,6 +146,7 @@ services:
     build: 
       context: ./micro-services/shoppingcart-service
       dockerfile: ../../docker/microservices/shoppingcart.dockerfile
+    image: mallhive/shoppingcart-service:latest 
     env_file:
       - ./micro-services/shoppingcart-service/.env
     ports:
@@ -152,6 +160,7 @@ services:
     build: 
       context: ./microfrontends/checkout-microfrontend
       dockerfile: ../../docker/microfrontends/checkout.dockerfile
+    image: mallhive/checkout-microfrontend:latest 
     ports:
       - "3400:3000"
     restart: always
@@ -163,6 +172,7 @@ services:
     build: 
       context: ./microfrontends/homepage-microfrontend
       dockerfile: ../../docker/microfrontends/homepage.dockerfile
+    image: mallhive/homepage-microfrontend:latest 
     ports:
       - "3100:3000"
     restart: always
@@ -174,6 +184,7 @@ services:
     build: 
       context: ./microfrontends/product-microfrontend
       dockerfile: ../../docker/microfrontends/product.dockerfile
+    image: mallhive/product-microfrontend:latest 
     ports:
       - "3200:3000"
     restart: always
@@ -185,6 +196,7 @@ services:
     build: 
       context: ./microfrontends/shoppingcart-microfrontend
       dockerfile: ../../docker/microfrontends/shoppingcart.dockerfile
+    image: mallhive/shoppingcart-microfrontend:latest 
     ports:
       - "3300:3000"
     restart: always
@@ -196,6 +208,7 @@ services:
     build: 
       context: ./microfrontends/userprofile-microfrontend
       dockerfile: ../../docker/microfrontends/userprofile.dockerfile
+    image: mallhive/userprofile-microfrontend:latest 
     ports:
       - "3500:3000"
     restart: always
