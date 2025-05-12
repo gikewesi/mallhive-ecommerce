@@ -3,7 +3,7 @@ name: Build and Push via Docker Compose + Makefile
 on:
   push:
     branches:
-      - main
+      - master
 
 jobs:
   build-and-push:
