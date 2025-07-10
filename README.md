@@ -35,7 +35,7 @@ MallHive enables sellers to efficiently list and sell their products while allow
 
 MallHive's architecture comprises multiple microservices, each responsible for specific functionalities. The services communicate through REST and gRPC APIs and utilize event-driven mechanisms for asynchronous operations.
 
-> _Note: Replace the above URL with your actual architecture diagram._
+> _URL  architecture diagram._
 
 ---
 
