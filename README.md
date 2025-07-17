@@ -32,7 +32,7 @@ MallHive allows sellers to list products and buyers to shop with ease, backed by
 
 The platform consists of multiple microservices communicating via REST and gRPC, supported by event-driven messaging for asynchronous workflows. The system runs on AWS EKS with serverless components for scalability.
 
-*(Add your architecture diagram here with a link or embedded image)*
+*(architecture diagram here)*
 
 ---
 
