@@ -1,65 +1,61 @@
 # 🛍️ MallHive: Cloud-Native E-Commerce Platform
 
-MallHive is a scalable, microservices-based e-commerce platform designed to facilitate seamless transactions between buyers and sellers. It offers personalized shopping experiences through AI-driven recommendations and ensures high availability and performance using modern cloud-native technologies.
+MallHive is a scalable, microservices-based e-commerce platform designed to connect buyers and sellers with personalized shopping experiences. It leverages modern cloud-native technologies to ensure high availability, performance, and ease of deployment.
 
 ---
 
 ## 📖 Table of Contents
 
-- [Overview](#-overview)
-- [Architecture](#-architecture)
-- [Tech Stack](#-tech-stack)
-- [Microservices](#-microservices)
-- [Infrastructure](#-infrastructure)
-- [CI/CD Pipeline](#-cicd-pipeline)
-- [Security](#-security)
-- [Monitoring & Observability](#-monitoring--observability)
-- [Micro Frontends](#-micro-frontends)
-- [Deployment Roadmap](#-deployment-roadmap)
-- [Contributing](#-contributing)
-- [License](#-license)
+* [Overview](#-overview)
+* [Architecture](#-architecture)
+* [Tech Stack](#-tech-stack)
+* [Microservices](#-microservices)
+* [Supporting Repositories](#-supporting-repositories)
+* [Infrastructure](#-infrastructure)
+* [CI/CD Pipeline](#-cicd-pipeline)
+* [Security](#-security)
+* [Monitoring & Observability](#-monitoring--observability)
+* [Micro Frontends](#-micro-frontends)
+* [Deployment Roadmap](#-deployment-roadmap)
+* [Contributing](#-contributing)
+* [License](#-license)
 
 ---
 
 ## 📄 Overview
 
-MallHive enables sellers to efficiently list and sell their products while allowing buyers to purchase items conveniently from their homes. Key features include:
-
-- **Personalized Recommendations**: AI-driven suggestions enhance user shopping experiences.
-- **Scalable Architecture**: Built with microservices for flexibility and scalability.
-- **Cloud-Native Deployment**: Leveraging AWS services for robust infrastructure.
+MallHive allows sellers to list products and buyers to shop with ease, backed by AI-powered personalized recommendations. It is built using microservices to enable independent development, deployment, and scaling of individual components.
 
 ---
 
 ## 🏗️ Architecture
 
-MallHive's architecture comprises multiple microservices, each responsible for specific functionalities. The services communicate through REST and gRPC APIs and utilize event-driven mechanisms for asynchronous operations.
+The platform consists of multiple microservices communicating via REST and gRPC, supported by event-driven messaging for asynchronous workflows. The system runs on AWS EKS with serverless components for scalability.
 
-> _URL  architecture diagram._
-
----
-
-## 🛠️ Tech Stack
-
-| Component             | Technology                                |
-|-----------------------|--------------------------------------------|
-| Backend Framework     | FastAPI (Python), Go, NestJS (Node.js)     |
-| Frontend              | React.js (Micro Frontends)                 |
-| Databases             | PostgreSQL (AWS RDS), Redis                |
-| Search Engine         | OpenSearch                                 |
-| AI/ML                 | AWS SageMaker                              |
-| Containerization      | Docker, Kubernetes (AWS EKS)               |
-| CI/CD                 | GitHub Actions, ArgoCD                     |
-| Infrastructure        | Terraform                                  |
-| Monitoring            | Prometheus, Grafana, AWS CloudWatch        |
-| Messaging             | AWS SNS, SQS, EventBridge                  |
-| Storage               | AWS S3, CloudFront                         |
-| Secrets Management    | AWS Secrets Manager                        |
-| Encryption            | AWS KMS                                    |
+*(Add your architecture diagram here with a link or embedded image)*
 
 ---
 
-## 🧩 Microservices
+## 🛠️ Tech Stack Highlights
+
+* Backend: FastAPI (Python), Go, NestJS (Node.js)
+* Frontend: React.js (micro frontends)
+* Databases: PostgreSQL (AWS RDS), Redis
+* Search: OpenSearch
+* AI/ML: AWS SageMaker
+* Containerization: Docker, Kubernetes (EKS + Fargate)
+* Infrastructure: Terraform
+* CI/CD: Jenkins, AWS CodeBuild, CodePipeline, CodeCommit, GitHub Actions, ArgoCD
+* Monitoring: Prometheus, Grafana, AWS CloudWatch
+* Messaging: AWS SNS, SQS, EventBridge
+* Storage: AWS S3, CloudFront
+* Secrets & Encryption: AWS Secrets Manager, KMS
+
+---
+
+## 🧩 Microservices Overview
+
+Each service is containerized and deployed independently on Kubernetes (EKS), with CI/CD automations for testing, building, and deployment using multiple tools.
 
 ### 1. User Authentication Service
 **Purpose**: Handles user registration, login, JWT authentication, and profile management.  
@@ -157,91 +153,78 @@ MallHive's architecture comprises multiple microservices, each responsible for s
 
 ---
 
+## 📂 Supporting Repositories
+
+MallHive is split into several repositories to keep concerns separate and manageable:
+
+1. **[mallhive-infra](https://github.com/gikewesi/mallhive-infra)**
+   Contains all Infrastructure as Code (IaC) configurations, primarily Terraform scripts, that provision and manage cloud resources including VPCs, EKS clusters, RDS instances, networking, container registries, and CI/CD pipelines. It also contains containerization and deployment automation setups for Jenkins, AWS CodeBuild, CodePipeline, and CodeCommit alongside GitHub Actions and ArgoCD.
+
+2. **[mallhive-security](https://github.com/gikewesi/mallhive-security)**
+   Focuses on security tooling and policies such as Kubernetes RBAC, network policies, IAM roles and policies, AWS Security Hub integrations, secrets management, and security scanning automation. This repo centralizes all security best practices applied across the platform.
+
+3. **[mallhive-monitoring](https://github.com/gikewesi/mallhive-monitoring)**
+   Houses observability components including Prometheus configurations, Grafana dashboards, alerting rules, AWS CloudWatch integration, OpenTelemetry instrumentation, and log aggregation setups. It covers application and infrastructure monitoring and alerting.
+
+---
+
 ## 🏗️ Infrastructure
 
-- **AWS EKS**: Kubernetes cluster for microservices.
-- **AWS Fargate**: Serverless container management.
-- **AWS RDS**: PostgreSQL for transactional data.
-- **AWS S3**: Storage for product images and static content.
-- **AWS CloudFront**: CDN for UI and media.
-- **AWS Secrets Manager**: Secure storage of sensitive data.
-- **AWS KMS**: Encryption for sensitive information.
-- **AWS ALB (Ingress)**: Load balancing for services.
-- **AWS CloudWatch**: Logging and monitoring.
-- **Terraform**: Infrastructure as Code (IaC) for provisioning.
+* AWS EKS with Fargate profiles for serverless container management
+* Managed PostgreSQL via AWS RDS
+* AWS S3 and CloudFront for static assets and CDN
+* Application Load Balancers for ingress
+* AWS Secrets Manager and KMS for secure secrets and encryption
+* Terraform as IaC for reproducible provisioning
 
 ---
 
 ## 🔄 CI/CD Pipeline
 
-### GitHub Actions Workflow
-- **Linting & Testing**: Run unit tests and integration tests.
-- **Build & Package**: Containerize services using Docker.
-- **Push to Registry**: Store images in Amazon Elastic Container Registry (ECR).
+MallHive’s CI/CD workflows are powered by multiple tools working together for reliability and flexibility:
 
-### ArgoCD Workflow
-- **Monitor**: Watch the Git repository for changes.
-- **Deploy**: Update Kubernetes deployments.
-- **Rollback**: Revert on failure using ArgoCD health checks.
+* **Jenkins**: Orchestrates build and deployment pipelines, integrates with testing tools, and handles complex workflow automation.
+* **AWS CodeBuild, CodePipeline, CodeCommit**: AWS-native tools for source control, build, and deployment automation integrated with the rest of the AWS ecosystem.
+* **GitHub Actions**: Runs unit and integration tests, builds Docker images tagged by git commit hashes, and pushes to Amazon ECR.
+* **ArgoCD**: Monitors Git repositories and deploys Kubernetes manifests to EKS clusters with automated rollbacks and health checks.
 
 ---
 
 ## 🔐 Security
 
-- **AWS Secrets Manager**: Store and rotate database credentials securely.
-- **AWS KMS**: Encrypt sensitive data (user PII, payment details).
-- **IAM Roles & Policies**: Implement least-privilege access model.
-- **Kubernetes RBAC**: Restrict user and service access.
-- **Network Policies**: Isolate services within the Kubernetes cluster.
-- **Mutual TLS (mTLS)**: Secure service-to-service communication.
+* Least-privilege IAM roles with scoped permissions
+* Kubernetes RBAC and Network Policies for pod-level isolation
+* Encrypted secrets storage with automatic rotation
+* Mutual TLS for service-to-service authentication
+* Continuous security validation via tooling in the mallhive-security repo
 
 ---
 
 ## 📊 Monitoring & Observability
 
-- **Logging**: Application logs with Fluent Bit to AWS CloudWatch.
-- **Metrics**: Use Prometheus and Grafana for real-time monitoring.
-- **Tracing**: Implement OpenTelemetry for distributed tracing.
-- **Alerting**: Set up alerts for failures and performance issues.
+* Centralized logs collected with Fluent Bit to CloudWatch
+* Metrics aggregated by Prometheus and visualized with Grafana
+* Distributed tracing with OpenTelemetry
+* Alerts configured for critical service failures and performance degradation
 
 ---
 
 ## 🧩 Micro Frontends
 
-- **Homepage Micro-Frontend**
-- **Product Micro-Frontend**
-- **Shopping Cart Micro-Frontend**
-- **Checkout Micro-Frontend**
-- **User Profile Micro-Frontend**
-
-Each micro-frontend is developed and deployed independently, allowing for modular updates and scalability.
+Frontend is broken into independently deployable  micro frontends covering key user flows like homepage, product browsing, cart, checkout, and user profile, enabling agile front-end development.
 
 ---
 
 ## 🚀 Deployment Roadmap
 
-### Phase 1:
-- Implement Authentication, Product Catalog, and Shopping Cart services.
-
-### Phase 2:
-- Develop Order Management and Payment Gateway services.
-
-### Phase 3:
-- Integrate Notification and Search & Recommendations services.
-
-### Phase 4:
-- Set up Analytics & Reporting service.
-
-### Phase 5:
-- Deploy Micro Frontends and complete end-to-end testing.
+Phased rollout starting with core services (authentication, product catalog, cart), followed by order processing, payments, notifications, search, analytics, and finally frontend microservices with end-to-end testing.
 
 ---
 
 ## 🤝 Contributing
 
-Contributions are welcome! Please follow these steps:
+Contributions are welcome!
 
-1. Fork the repository.
-2. Create a new branch:
-   ```bash
-   git checkout -b feature/YourFeature
+* Fork the repo
+* Create feature branches
+* Submit pull requests with clear descriptions and tests
