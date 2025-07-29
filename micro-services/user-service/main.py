@@ -1,151 +1,136 @@
-from datetime import datetime, timedelta
-from typing import Optional
-
-from fastapi import FastAPI, Depends, HTTPException, status, APIRouter
+from fastapi import FastAPI, Depends, BackgroundTasks, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
-from jose import JWTError, jwt
+from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
-from passlib.context import CryptContext
-from pydantic import BaseModel
-from dotenv import load_dotenv
-import os
-import requests
+from starlette.responses import JSONResponse
 
-from database import get_db, get_user_by_email, create_user
-
-# Load environment variables
-load_dotenv()
-
-# JWT Config
-SECRET_KEY = os.getenv("SECRET_KEY", "fallback_secret_key")
-ALGORITHM = os.getenv("ALGORITHM", "HS256")
-ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", 30))
-
-# Notification Microservice
-NOTIFICATION_SERVICE_URL = os.getenv("NOTIFICATION_SERVICE_URL")
-
-# Password Hashing
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-
-# OAuth2 Scheme
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/v1/auth/token")
-
-# FastAPI Router
-auth_router = APIRouter(prefix="/api/v1/auth", tags=["Authentication"])
-
-# -------------------- Pydantic Models --------------------
-
-class UserRegister(BaseModel):
-    username: str
-    email: str
-    password: str
-
-class UserResponse(BaseModel):
-    id: int
-    username: str
-    email: str
-
-class TokenResponse(BaseModel):
-    access_token: str
-    token_type: str
-
-# -------------------- Helper Functions --------------------
-
-def hash_password(password: str) -> str:
-    return pwd_context.hash(password)
-
-def verify_password(plain_password: str, hashed_password: str) -> bool:
-    return pwd_context.verify(plain_password, hashed_password)
-
-def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
-    to_encode = data.copy()
-    expire = datetime.utcnow() + (expires_delta or timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES))
-    to_encode.update({"exp": expire})
-    return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
-
-def authenticate_user(db: Session, email: str, password: str):
-    user = get_user_by_email(db, email)
-    if not user or not verify_password(password, user.hashed_password):
-        return None
-    return user
-
-def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)):
-    try:
-        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-        email: str = payload.get("sub")
-        if email is None:
-            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token payload")
-        user = get_user_by_email(db, email)
-        if user is None:
-            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="User not found")
-        return user
-    except JWTError:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Could not validate credentials")
-
-def notify_service(event_type: str, email: str):
-    if not NOTIFICATION_SERVICE_URL:
-        print("⚠️ Notification service URL not set")
-        return
-    try:
-        payload = {"type": event_type, "email": email}
-        requests.post(NOTIFICATION_SERVICE_URL, json=payload, timeout=5)
-    except Exception as e:
-        print(f"Notification service failed: {e}")
-
-# -------------------- API Endpoints --------------------
-
-@auth_router.post("/register", response_model=UserResponse, status_code=201)
-def register_user(user_data: UserRegister, db: Session = Depends(get_db)):
-    existing_user = get_user_by_email(db, user_data.email)
-    if existing_user:
-        raise HTTPException(status_code=400, detail="Email already registered")
-    
-    hashed_password = hash_password(user_data.password)
-    user = create_user(db, user_data.username, user_data.email, hashed_password)
-
-    notify_service("register", user.email)
-
-    return user
-
-@auth_router.post("/token", response_model=TokenResponse)
-def login_user(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
-    user = authenticate_user(db, form_data.username, form_data.password)
-    if not user:
-        raise HTTPException(status_code=400, detail="Invalid email or password")
-    
-    access_token = create_access_token(data={"sub": user.email})
-
-    notify_service("login", user.email)
-
-    return {"access_token": access_token, "token_type": "bearer"}
-
-@auth_router.get("/me", response_model=UserResponse)
-def get_user_profile(current_user: dict = Depends(get_current_user)):
-    return current_user
-
-# -------------------- Main Application --------------------
-
-app = FastAPI(
-    title="User Auth API",
-    version="1.0.0",
-    description="Authentication Service for User Profile Microfrontend"
+from auth import (
+    register_user,
+    login_user,
+    verify_email,
+    resend_verification,
+    forgot_password,
+    reset_password,
 )
+from database import get_db, UserCreate
+from logging import get_logger
+from metrics import record_metric  # Optional: if you use custom metrics
+from slowapi import Limiter
+from slowapi.util import get_remote_address
+from slowapi.errors import RateLimitExceeded
 
-# Parse CORS origins from .env
-origins = os.getenv("CORS_ORIGINS", "").split(",")
+import uuid
+from pydantic import ValidationError
 
+logger = get_logger(__name__)
+
+app = FastAPI(title="User Service")
+
+# Set up rate limiting
+limiter = Limiter(key_func=get_remote_address)
+app.state.limiter = limiter
+
+# CORS configuration
+origins = ["http://localhost:3000"]  # Replace with actual frontend origins
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[origin.strip() for origin in origins],
+    allow_origins=origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-app.include_router(auth_router)
+# Middleware to attach correlation ID to each request
+@app.middleware("http")
+async def add_correlation_id(request: Request, call_next):
+    correlation_id = request.headers.get("X-Correlation-ID") or str(uuid.uuid4())
+    request.state.correlation_id = correlation_id
+    response = await call_next(request)
+    response.headers["X-Correlation-ID"] = correlation_id
+    return response
 
-# Optional: Uvicorn runner if run directly
-if __name__ == "__main__":
-    import uvicorn
-    uvicorn.run("user:app", host="127.0.0.1", port=8000, reload=True)
+@app.exception_handler(RateLimitExceeded)
+async def rate_limit_handler(request: Request, exc: RateLimitExceeded):
+    return JSONResponse(status_code=429, content={"detail": "Rate limit exceeded. Try again later."})
+
+
+# --- ROUTES ---
+
+@app.post("/register")
+@limiter.limit("5/minute")
+async def api_register_user(user_data: dict, background_tasks: BackgroundTasks, db: Session = Depends(get_db)):
+    """
+    Register a new user.
+    """
+    try:
+        user_obj = UserCreate(**user_data)
+    except ValidationError as e:
+        raise HTTPException(status_code=422, detail=e.errors())
+
+    return await register_user(user_obj, background_tasks, db)
+
+
+@app.post("/login")
+@limiter.limit("10/minute")
+async def api_login_user(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
+    """
+    Authenticate user and return access token.
+    """
+    token = await login_user(form_data.username, form_data.password, db)
+    return {"access_token": token, "token_type": "bearer"}
+
+
+@app.post("/verify-email")
+@limiter.limit("5/minute")
+async def api_verify_email(data: dict, db: Session = Depends(get_db)):
+    """
+    Verify user email with code.
+    """
+    email = data.get("email")
+    code = data.get("code")
+    if not email or not code:
+        raise HTTPException(status_code=400, detail="Email and code required")
+
+    return await verify_email(email, code, db)
+
+
+@app.post("/resend-verification")
+@limiter.limit("5/minute")
+async def api_resend_verification(data: dict, background_tasks: BackgroundTasks, db: Session = Depends(get_db)):
+    """
+    Resend email verification code.
+    """
+    email = data.get("email")
+    if not email:
+        raise HTTPException(status_code=400, detail="Email required")
+
+    return await resend_verification(email, background_tasks, db)
+
+
+@app.post("/forgot-password")
+@limiter.limit("5/minute")
+async def api_forgot_password(data: dict, background_tasks: BackgroundTasks, db: Session = Depends(get_db)):
+    """
+    Send reset code to email.
+    """
+    email = data.get("email")
+    if not email:
+        raise HTTPException(status_code=400, detail="Email required")
+
+    return await forgot_password(email, background_tasks, db)
+
+
+@app.post("/reset-password")
+@limiter.limit("5/minute")
+async def api_reset_password(data: dict, db: Session = Depends(get_db)):
+    """
+    Reset password using code sent to email.
+    """
+    email = data.get("email")
+    code = data.get("code")
+    new_password = data.get("new_password")
+
+    if not all([email, code, new_password]):
+        raise HTTPException(status_code=400, detail="Email, code, and new_password required")
+
+    return await reset_password(email, code, new_password, db)
