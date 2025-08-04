@@ -3,7 +3,9 @@
 ## 🏗 Architecture Overview
 
 MallHive is a cloud-native e-commerce platform built using a **microservices architecture** with **microfrontends**, the **Backend-for-Frontend (BFF)** pattern, and **event-driven communication**.
-MallHive allows sellers to list products and buyers to shop with ease, backed by **AI-powered** personalized recommendations.
+
+MallHive helps buyers to shop with ease, backed by **AI-powered** personalized recommendations.
+
 Each major feature (e.g., product catalog, cart, user profile, checkout) is implemented as an isolated microservice and corresponding microfrontend. Each service is designed with strong boundaries and minimal backend dependencies, enabling independent development and deployment.
 
 ---
