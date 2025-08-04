@@ -31,7 +31,7 @@ limiter = Limiter(key_func=get_remote_address)
 app.state.limiter = limiter
 
 # CORS configuration
-origins = ["http://localhost:3000"]  # Replace with actual frontend origins
+origins = ["https://homepage.mallhive.com"]
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
