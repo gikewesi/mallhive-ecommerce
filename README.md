@@ -150,15 +150,6 @@ MallHive is split into several repositories to keep concerns separate and manage
 
 ---
 
-## 📈 Future Improvements
-
-* mTLS between services
-* ML-based recommendation engine (real-time embeddings)
-* Feature flags per microfrontend (via AWS AppConfig)
-* Canary and blue/green deployment support via Argo Rollouts
-
----
-
 ## 📄 License
 
 [MIT](LICENSE)
