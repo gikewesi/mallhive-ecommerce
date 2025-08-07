@@ -155,3 +155,13 @@ MallHive is split into several repositories to keep concerns separate and manage
 [MIT](LICENSE)
 
 ---
+
+## ⚠️ Disclaimer
+
+> **Note**: The microservices and microfrontends in this project are **not fully implemented** in terms of business logic. They serve primarily as **mock services and UI placeholders** to demonstrate cloud-native design patterns, deployment automation, and DevOps practices.
+>
+> The main purpose of this project is to showcase skills in **infrastructure provisioning**, **CI/CD**, **Kubernetes orchestration**, **GitOps**, **observability**, and **secure cloud-native deployments**.
+>
+> Developers and contributors are welcome to fork, improve, or expand the application logic to make it more production-ready.
+
+---
