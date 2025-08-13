@@ -106,8 +106,8 @@ cart.mallhive.com → cart.mallhive.com/api/items
 ### 📡 Observability:
 
 * **Metrics**: Prometheus + Grafana
-* **Logs**: CloudWatch Logs + FluentBit/LogRouter
-* **Tracing**: AWS X-Ray or OpenTelemetry
+* **Logs**: CloudWatch Logs
+* **Tracing**: OpenTelemetry
 
 ### 🔐 Security:
 
@@ -135,18 +135,14 @@ cart.mallhive.com → cart.mallhive.com/api/items
 
 ---
 
-## 📂 Supporting Repositories
+## 📂 Supporting Repository
 
-MallHive is split into several repositories to keep concerns separate and manageable:
+MallHive separates concerns by maintaining a dedicated infrastructure repository:
 
-1. **[mallhive-infra](https://github.com/gikewesi/mallhive-infra)**
-   Contains all Infrastructure as Code (IaC) configurations, primarily Terraform scripts, that provision and manage cloud resources including VPCs, EKS clusters, RDS instances, networking, container registries, and CI/CD pipelines. It also contains containerization and deployment automation setups for Jenkins, AWS CodeBuild, CodePipeline, and CodeCommit alongside GitHub Actions and ArgoCD.
+**[mallhive-infra](https://github.com/gikewesi/mallhive-infra)**
+This repository manages all Infrastructure as Code (IaC) configurations, primarily using Terraform, to provision and maintain cloud resources such as VPCs, EKS clusters, RDS instances, networking components, and container registries. It also handles CI/CD pipelines and deployment automation using Jenkins, AWS CodeBuild, CodePipeline, CodeCommit, GitHub Actions, and ArgoCD.
 
-2. **[mallhive-security](https://github.com/gikewesi/mallhive-security)**
-   Focuses on security tooling and policies such as Kubernetes RBAC, network policies, IAM roles and policies, AWS Security Hub integrations, secrets management, and security scanning automation. This repo centralizes all security best practices applied across the platform.
-
-3. **[mallhive-monitoring](https://github.com/gikewesi/mallhive-monitoring)**
-   Houses observability components including Prometheus configurations, Grafana dashboards, alerting rules, AWS CloudWatch integration, OpenTelemetry instrumentation, and log aggregation setups. It covers application and infrastructure monitoring and alerting.
+In addition, it includes observability setups with Prometheus, Grafana dashboards, alerting rules, AWS CloudWatch integration, OpenTelemetry instrumentation, and log aggregation to cover both application and infrastructure monitoring.
 
 ---
 

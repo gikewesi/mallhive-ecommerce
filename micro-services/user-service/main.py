@@ -30,8 +30,11 @@ app = FastAPI(title="User Service")
 limiter = Limiter(key_func=get_remote_address)
 app.state.limiter = limiter
 
-# CORS configuration
-origins = ["https://homepage.mallhive.com"]
+origins = [
+    "https://user.mallhive.com",
+    "https://checkout.mallhive.com",
+]
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,

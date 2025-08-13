@@ -66,7 +66,7 @@ Credentials and sensitive config are pulled from **AWS Secrets Manager**.
 | Variable             | Description                       |
 | -------------------- | --------------------------------- |
 | `AWS_REGION`         | AWS region (default: `us-east-1`) |
-| `DB_SECRET_NAME`     | Secrets Manager ID for DB creds   |
+| `USER_SERVICE_SECRET_NAME`     | Secrets Manager ID for DB creds   |
 | `JWT_SECRET_KEY`     | Secret for signing JWTs           |
 | `JWT_EXPIRATION_MIN` | JWT expiration time (in minutes)  |
 | `DATADOG_API_KEY`    | (Optional) API key for Datadog    |
